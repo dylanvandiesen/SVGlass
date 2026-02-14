@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Metal Border Generator - Paint API</title>
+  <style>
+    :root {
+      --border-size: 1.5;
+      --radius: 26;
+      --bevel-depth: 0.7;
+      --bevel-softness: 0.6;
+      --roughness: 0.25;
+      --texture-scale: 1.1;
+      --texture-strength: 0.35;
+
+      --conic-arms: 6;
+      --arm-width: 0.32;
+      --arm-contrast: 0.45;
+      --arm-spin: 1;
+
+      --light-angle: 30;
+      --light-elevation: 0.7;
+      --light-intensity: 1;
+      --scroll-drive: 1;
+
+      --color1-r: 230; --color1-g: 236; --color1-b: 246; --color1-a: 0.95;
+      --color2-r: 138; --color2-g: 149; --color2-b: 169; --color2-a: 0.88;
+      --color3-r: 66; --color3-g: 74; --color3-b: 90; --color3-a: 0.86;
+      --color4-r: 248; --color4-g: 251; --color4-b: 255; --color4-a: 0.5;
+
+      --center-tint-a: 0;
+
+      --outer-shadow-x: 0;
+      --outer-shadow-y: 8;
+      --outer-shadow-blur: 26;
+      --outer-shadow-r: 0; --outer-shadow-g: 0; --outer-shadow-b: 0; --outer-shadow-a: 0.45;
+
+      --inner-shadow-x: 0;
+      --inner-shadow-y: 2;
+      --inner-shadow-blur: 18;
+      --inner-shadow-spread: 1;
+      --inner-shadow-r: 8; --inner-shadow-g: 11; --inner-shadow-b: 17; --inner-shadow-a: 0.62;
+
+      --mix-blend: normal;
+      --filter-brightness: 1;
+      --filter-contrast: 1.05;
+      --filter-saturate: 1.1;
+      --filter-hue: 0;
+      --filter-sepia: 0;
+      --filter-blur: 0;
+      --filter-grayscale: 0;
+      --filter-invert: 0;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 260vh;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      color: #eef3ff;
+      background: radial-gradient(circle at 15% 12%, #373f58 0%, #181a25 40%, #0d0f16 100%);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(300px, 420px) minmax(0, 1fr);
+      gap: 1rem;
+      padding: 1rem;
+      align-items: start;
+    }
+
+    .controls {
+      position: sticky;
+      top: .5rem;
+      max-height: calc(100vh - 1rem);
+      overflow: auto;
+      border-radius: 16px;
+      padding: .9rem;
+      background: rgba(16, 20, 30, .84);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,.14);
+    }
+
+    h2 { margin: 0 0 .4rem; font-size: 1.1rem; }
+    .controls p { margin: 0 0 .8rem; font-size: .84rem; opacity: .84; }
+    .group { margin-top: .75rem; padding-top: .75rem; border-top: 1px solid rgba(255,255,255,.12); }
+    .group h3 { margin: 0 0 .5rem; font-size: .88rem; opacity: .92; }
+
+    label { display: block; font-size: .79rem; margin-bottom: .45rem; }
+    .caption { display: flex; justify-content: space-between; gap: .5rem; margin-bottom: .1rem; }
+    input[type="range"], select, input[type="color"] { width: 100%; }
+    input[type="color"] { height: 38px; border: none; border-radius: 8px; background: transparent; }
+
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+    .row3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: .45rem; }
+
+    .stage {
+      display: grid;
+      place-items: center;
+      min-height: 94vh;
+      padding: 1rem;
+    }
+
+    .card-wrap {
+      position: relative;
+      width: min(92vw, 840px);
+      min-height: min(60vh, 520px);
+      border-radius: calc(var(--radius) * 1px);
+      isolation: isolate;
+      filter:
+        brightness(var(--filter-brightness))
+        contrast(var(--filter-contrast))
+        saturate(var(--filter-saturate))
+        hue-rotate(calc(var(--filter-hue) * 1deg))
+        sepia(var(--filter-sepia))
+        grayscale(var(--filter-grayscale))
+        invert(var(--filter-invert))
+        blur(calc(var(--filter-blur) * 1px));
+    }
+
+    .card-wrap::before,
+    .card-wrap::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+    }
+
+    .card-wrap::before {
+      background: paint(metal-border);
+      mix-blend-mode: var(--mix-blend);
+      box-shadow:
+        calc(var(--outer-shadow-x) * 1px)
+        calc(var(--outer-shadow-y) * 1px)
+        calc(var(--outer-shadow-blur) * 1px)
+        rgba(var(--outer-shadow-r), var(--outer-shadow-g), var(--outer-shadow-b), var(--outer-shadow-a));
+    }
+
+    .card-wrap::after {
+      inset: calc(var(--border-size) * 1px);
+      border-radius: calc((var(--radius) - var(--border-size) * 0.5) * 1px);
+      background: rgba(255,255,255,var(--center-tint-a));
+      box-shadow:
+        inset calc(var(--inner-shadow-x) * 1px)
+        calc(var(--inner-shadow-y) * 1px)
+        calc(var(--inner-shadow-blur) * 1px)
+        calc(var(--inner-shadow-spread) * 1px)
+        rgba(var(--inner-shadow-r), var(--inner-shadow-g), var(--inner-shadow-b), var(--inner-shadow-a));
+    }
+
+    .content {
+      position: absolute;
+      inset: calc(var(--border-size) * 1px);
+      border-radius: calc((var(--radius) - var(--border-size) * 0.5) * 1px);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 1.2rem;
+      background: transparent;
+    }
+
+    .content h1 { margin: 0; font-size: clamp(1.4rem, 3vw, 2.45rem); }
+    .content p { max-width: 42ch; opacity: .88; }
+
+    @media (max-width: 920px) {
+      .layout { grid-template-columns: 1fr; }
+      .controls {
+        position: fixed;
+        left: .6rem;
+        right: .6rem;
+        bottom: .6rem;
+        top: auto;
+        max-height: 45vh;
+        z-index: 20;
+      }
+      .stage { padding-bottom: 47vh; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="controls">
+      <h2>Metal Border Generator</h2>
+      <p>Center is transparent by default. Scroll animates light with direct mapping (no friction easing).</p>
+
+      <div class="group">
+        <h3>Geometry + Bevel + Light</h3>
+        <label><span class="caption">Border size <output data-out="--border-size"></output></span><input data-var="--border-size" type="range" min="0" max="64" step="0.25" value="1.5"></label>
+        <label><span class="caption">Radius <output data-out="--radius"></output></span><input data-var="--radius" type="range" min="0" max="100" step="1" value="26"></label>
+        <label><span class="caption">Bevel depth <output data-out="--bevel-depth"></output></span><input data-var="--bevel-depth" type="range" min="0" max="1.5" step="0.01" value="0.7"></label>
+        <label><span class="caption">Bevel softness <output data-out="--bevel-softness"></output></span><input data-var="--bevel-softness" type="range" min="0.05" max="2" step="0.01" value="0.6"></label>
+        <label><span class="caption">Light angle <output data-out="--light-angle"></output></span><input data-var="--light-angle" type="range" min="0" max="360" step="1" value="30"></label>
+        <label><span class="caption">Light elevation <output data-out="--light-elevation"></output></span><input data-var="--light-elevation" type="range" min="0" max="1" step="0.01" value="0.7"></label>
+        <label><span class="caption">Light intensity <output data-out="--light-intensity"></output></span><input data-var="--light-intensity" type="range" min="0" max="2" step="0.01" value="1"></label>
+        <label><span class="caption">Scroll drive <output data-out="--scroll-drive"></output></span><input data-var="--scroll-drive" type="range" min="0" max="4" step="0.01" value="1"></label>
+      </div>
+
+      <div class="group">
+        <h3>Conic Arms + Texture</h3>
+        <label><span class="caption">Conic arms <output data-out="--conic-arms"></output></span><input data-var="--conic-arms" type="range" min="1" max="24" step="1" value="6"></label>
+        <label><span class="caption">Arm width <output data-out="--arm-width"></output></span><input data-var="--arm-width" type="range" min="0.05" max="0.95" step="0.01" value="0.32"></label>
+        <label><span class="caption">Arm contrast <output data-out="--arm-contrast"></output></span><input data-var="--arm-contrast" type="range" min="0" max="1" step="0.01" value="0.45"></label>
+        <label><span class="caption">Arm spin factor <output data-out="--arm-spin"></output></span><input data-var="--arm-spin" type="range" min="0" max="4" step="0.01" value="1"></label>
+        <label><span class="caption">Roughness <output data-out="--roughness"></output></span><input data-var="--roughness" type="range" min="0" max="1" step="0.01" value="0.25"></label>
+        <label><span class="caption">Texture scale <output data-out="--texture-scale"></output></span><input data-var="--texture-scale" type="range" min="0.2" max="8" step="0.01" value="1.1"></label>
+        <label><span class="caption">Texture strength <output data-out="--texture-strength"></output></span><input data-var="--texture-strength" type="range" min="0" max="1" step="0.01" value="0.35"></label>
+      </div>
+
+      <div class="group">
+        <h3>Colors + Alpha per stop</h3>
+        <div id="color-controls"></div>
+      </div>
+
+      <div class="group">
+        <h3>Center + Shadows + Blend + Filters</h3>
+        <label><span class="caption">Center tint alpha (0=transparent) <output data-out="--center-tint-a"></output></span><input data-var="--center-tint-a" type="range" min="0" max="1" step="0.01" value="0"></label>
+
+        <div class="row2">
+          <label><span class="caption">Outer shadow color</span><input type="color" id="outer-shadow-color" value="#000000"></label>
+          <label><span class="caption">Inner shadow color</span><input type="color" id="inner-shadow-color" value="#080b11"></label>
+        </div>
+
+        <div class="row3">
+          <label><span class="caption">Outer X <output data-out="--outer-shadow-x"></output></span><input data-var="--outer-shadow-x" type="range" min="-60" max="60" step="1" value="0"></label>
+          <label><span class="caption">Outer Y <output data-out="--outer-shadow-y"></output></span><input data-var="--outer-shadow-y" type="range" min="-60" max="60" step="1" value="8"></label>
+          <label><span class="caption">Outer blur <output data-out="--outer-shadow-blur"></output></span><input data-var="--outer-shadow-blur" type="range" min="0" max="120" step="1" value="26"></label>
+        </div>
+
+        <label><span class="caption">Outer alpha <output data-out="--outer-shadow-a"></output></span><input data-var="--outer-shadow-a" type="range" min="0" max="1" step="0.01" value="0.45"></label>
+
+        <div class="row3">
+          <label><span class="caption">Inner X <output data-out="--inner-shadow-x"></output></span><input data-var="--inner-shadow-x" type="range" min="-60" max="60" step="1" value="0"></label>
+          <label><span class="caption">Inner Y <output data-out="--inner-shadow-y"></output></span><input data-var="--inner-shadow-y" type="range" min="-60" max="60" step="1" value="2"></label>
+          <label><span class="caption">Inner blur <output data-out="--inner-shadow-blur"></output></span><input data-var="--inner-shadow-blur" type="range" min="0" max="120" step="1" value="18"></label>
+        </div>
+
+        <label><span class="caption">Inner spread <output data-out="--inner-shadow-spread"></output></span><input data-var="--inner-shadow-spread" type="range" min="-50" max="60" step="1" value="1"></label>
+        <label><span class="caption">Inner alpha <output data-out="--inner-shadow-a"></output></span><input data-var="--inner-shadow-a" type="range" min="0" max="1" step="0.01" value="0.62"></label>
+
+        <label><span class="caption">Blend mode</span>
+          <select data-var="--mix-blend">
+            <option>normal</option><option>overlay</option><option>screen</option><option>multiply</option>
+            <option>soft-light</option><option>hard-light</option><option>color-dodge</option><option>color-burn</option>
+            <option>luminosity</option><option>difference</option>
+          </select>
+        </label>
+
+        <label><span class="caption">Brightness <output data-out="--filter-brightness"></output></span><input data-var="--filter-brightness" type="range" min="0.3" max="2.5" step="0.01" value="1"></label>
+        <label><span class="caption">Contrast <output data-out="--filter-contrast"></output></span><input data-var="--filter-contrast" type="range" min="0.4" max="3" step="0.01" value="1.05"></label>
+        <label><span class="caption">Saturate <output data-out="--filter-saturate"></output></span><input data-var="--filter-saturate" type="range" min="0" max="4" step="0.01" value="1.1"></label>
+        <label><span class="caption">Hue <output data-out="--filter-hue"></output></span><input data-var="--filter-hue" type="range" min="0" max="360" step="1" value="0"></label>
+        <label><span class="caption">Sepia <output data-out="--filter-sepia"></output></span><input data-var="--filter-sepia" type="range" min="0" max="1" step="0.01" value="0"></label>
+        <label><span class="caption">Grayscale <output data-out="--filter-grayscale"></output></span><input data-var="--filter-grayscale" type="range" min="0" max="1" step="0.01" value="0"></label>
+        <label><span class="caption">Invert <output data-out="--filter-invert"></output></span><input data-var="--filter-invert" type="range" min="0" max="1" step="0.01" value="0"></label>
+        <label><span class="caption">Blur <output data-out="--filter-blur"></output></span><input data-var="--filter-blur" type="range" min="0" max="8" step="0.1" value="0"></label>
+      </div>
+    </aside>
+
+    <main class="stage">
+      <div class="card-wrap">
+        <div class="content">
+          <div>
+            <h1>Metal Border Worklet</h1>
+            <p>Border ring is painted by CSS Paint API. Scroll drives light angle directly (no smoothing lag), and center stays transparent unless tinted.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const WORKLET = `
+class MetalBorderPainter {
+  static get inputProperties() {
+    return [
+      '--border-size','--radius','--bevel-depth','--bevel-softness','--roughness','--texture-scale','--texture-strength',
+      '--conic-arms','--arm-width','--arm-contrast','--arm-spin',
+      '--light-angle','--light-elevation','--light-intensity',
+      '--color1-r','--color1-g','--color1-b','--color1-a',
+      '--color2-r','--color2-g','--color2-b','--color2-a',
+      '--color3-r','--color3-g','--color3-b','--color3-a',
+      '--color4-r','--color4-g','--color4-b','--color4-a'
+    ];
+  }
+  p(props,n,d=0){ const v = parseFloat((props.get(n)||'').toString()); return Number.isFinite(v) ? v : d; }
+  rgba(props,i){ return [this.p(props,'--color'+i+'-r',255),this.p(props,'--color'+i+'-g',255),this.p(props,'--color'+i+'-b',255),this.p(props,'--color'+i+'-a',1)]; }
+  hash(x,y){ return (Math.sin(x*127.1 + y*311.7) * 43758.5453123) % 1; }
+
+  paint(ctx, size, props) {
+    const w = size.width, h = size.height;
+    const border = Math.max(0, this.p(props,'--border-size',1));
+    const radius = Math.max(0, this.p(props,'--radius',20));
+    if (border <= 0.001) return;
+
+    const bevelDepth = this.p(props,'--bevel-depth',0.7);
+    const bevelSoft = Math.max(0.02, this.p(props,'--bevel-softness',0.6));
+    const rough = this.p(props,'--roughness',0.25);
+    const texScale = Math.max(0.05, this.p(props,'--texture-scale',1));
+    const texStrength = this.p(props,'--texture-strength',0.35);
+
+    const arms = Math.max(1, Math.floor(this.p(props,'--conic-arms',6)));
+    const armWidth = Math.max(0.01, Math.min(0.99, this.p(props,'--arm-width',0.32)));
+    const armContrast = this.p(props,'--arm-contrast',0.45);
+    const armSpin = this.p(props,'--arm-spin',1);
+
+    const angleDeg = this.p(props,'--light-angle',30);
+    const angle = angleDeg * (Math.PI/180);
+    const elev = this.p(props,'--light-elevation',0.7);
+    const intensity = this.p(props,'--light-intensity',1);
+
+    const c1=this.rgba(props,1), c2=this.rgba(props,2), c3=this.rgba(props,3), c4=this.rgba(props,4);
+
+    const outer = new Path2D();
+    outer.roundRect(0,0,w,h,radius);
+    const inner = new Path2D();
+    const innerRad = Math.max(0, radius - border * 0.48);
+    inner.roundRect(border,border,Math.max(0,w-border*2),Math.max(0,h-border*2),innerRad);
+
+    ctx.save();
+    ctx.clip(outer);
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fill(inner);
+    ctx.globalCompositeOperation = 'source-over';
+
+    // Base metal conic
+    const base = ctx.createConicGradient(angle, w*0.5, h*0.5);
+    base.addColorStop(0.00, 'rgba('+c1[0]+','+c1[1]+','+c1[2]+','+c1[3]+')');
+    base.addColorStop(0.28, 'rgba('+c2[0]+','+c2[1]+','+c2[2]+','+c2[3]+')');
+    base.addColorStop(0.62, 'rgba('+c3[0]+','+c3[1]+','+c3[2]+','+c3[3]+')');
+    base.addColorStop(1.00, 'rgba('+c4[0]+','+c4[1]+','+c4[2]+','+c4[3]+')');
+    ctx.fillStyle = base;
+    ctx.fillRect(0,0,w,h);
+
+    // Multi-arm conic overlay
+    const arm = ctx.createConicGradient(angle * armSpin, w*0.5, h*0.5);
+    for (let i=0; i<arms; i++) {
+      const s = i / arms;
+      const e = (i + armWidth) / arms;
+      const mid = (s + e) * 0.5;
+      arm.addColorStop(s % 1, 'rgba(255,255,255,0)');
+      arm.addColorStop(mid % 1, 'rgba(255,255,255,' + (0.22 * armContrast) + ')');
+      arm.addColorStop(e % 1, 'rgba(0,0,0,' + (0.12 * armContrast) + ')');
+    }
+    ctx.globalCompositeOperation = 'overlay';
+    ctx.fillStyle = arm;
+    ctx.fillRect(0,0,w,h);
+    ctx.globalCompositeOperation = 'source-over';
+
+    // Bevel specifically near outer and inner border edges.
+    const bevelPx = Math.max(1, Math.floor(border * (0.9 + bevelDepth)));
+    const lx = Math.cos(angle), ly = Math.sin(angle);
+    const gx0 = w*0.5 - lx*w*0.5, gy0 = h*0.5 - ly*h*0.5;
+    const gx1 = w*0.5 + lx*w*0.5, gy1 = h*0.5 + ly*h*0.5;
+
+    const hiGrad = ctx.createLinearGradient(gx0,gy0,gx1,gy1);
+    hiGrad.addColorStop(0,'rgba(255,255,255,0)');
+    hiGrad.addColorStop(1,'rgba(255,255,255,' + (0.45*bevelDepth*intensity*(0.7+0.5*elev)) + ')');
+
+    const loGrad = ctx.createLinearGradient(gx0,gy0,gx1,gy1);
+    loGrad.addColorStop(0,'rgba(0,0,0,' + (0.35*bevelDepth*bevelSoft) + ')');
+    loGrad.addColorStop(1,'rgba(0,0,0,0)');
+
+    for (let i=0; i<bevelPx; i++) {
+      const t = i / bevelPx;
+      const alpha = Math.pow(1 - t, 1.2 / bevelSoft);
+      const off = 0.5 + i;
+      const lineW = 1;
+
+      // outer edge
+      ctx.strokeStyle = hiGrad;
+      ctx.globalAlpha = alpha * 0.36;
+      ctx.lineWidth = lineW;
+      ctx.beginPath();
+      ctx.roundRect(off, off, Math.max(0,w-off*2), Math.max(0,h-off*2), Math.max(0,radius-off));
+      ctx.stroke();
+
+      // inner edge opposite for crisp bevel
+      const ioff = Math.max(0, border - off);
+      ctx.strokeStyle = loGrad;
+      ctx.globalAlpha = alpha * 0.34;
+      ctx.beginPath();
+      ctx.roundRect(border+ioff, border+ioff, Math.max(0,w-(border+ioff)*2), Math.max(0,h-(border+ioff)*2), Math.max(0,innerRad-ioff));
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+
+    // Metal micro-texture
+    const cell = Math.max(1, Math.floor(3 / texScale));
+    for (let y=0; y<h; y+=cell) {
+      for (let x=0; x<w; x+=cell) {
+        const n = this.hash(x*0.033*texScale, y*0.033*texScale);
+        const dir = Math.abs(Math.sin((x*lx + y*ly) * 0.015 * texScale));
+        const a = (n*0.58 + dir*0.42) * texStrength * (0.06 + rough*0.2);
+        if (a < 0.005) continue;
+        ctx.fillStyle = 'rgba(255,255,255,' + a + ')';
+        ctx.fillRect(x,y,cell,cell);
+      }
+    }
+
+    ctx.restore();
+  }
+}
+registerPaint('metal-border', MetalBorderPainter);
+`;
+
+(async function initWorklet(){
+  if (!('paintWorklet' in CSS)) {
+    alert('CSS Paint API not supported in this browser.');
+    return;
+  }
+  const blob = new Blob([WORKLET], { type: 'text/javascript' });
+  await CSS.paintWorklet.addModule(URL.createObjectURL(blob));
+})();
+
+const root = document.documentElement;
+const outputs = document.querySelectorAll('[data-out]');
+const controls = document.querySelectorAll('[data-var]');
+
+const state = {
+  manualLightAngle: 30,
+  scrollDrive: 1,
+  armSpin: 1,
+};
+
+function setVar(name, value) { root.style.setProperty(name, String(value)); }
+function out(name, value) {
+  const el = document.querySelector('[data-out="' + name + '"]');
+  if (el) el.textContent = String(value);
+}
+
+controls.forEach((el) => {
+  const key = el.dataset.var;
+  const update = () => {
+    setVar(key, el.value);
+    out(key, el.value);
+    if (key === '--light-angle') state.manualLightAngle = parseFloat(el.value) || 0;
+    if (key === '--scroll-drive') state.scrollDrive = parseFloat(el.value) || 0;
+    if (key === '--arm-spin') state.armSpin = parseFloat(el.value) || 0;
+  };
+  el.addEventListener('input', update, { passive: true });
+  update();
+});
+
+outputs.forEach((el) => {
+  if (!el.textContent) {
+    const key = el.dataset.out;
+    el.textContent = getComputedStyle(root).getPropertyValue(key).trim();
+  }
+});
+
+function hexToRgb(hex) {
+  const h = hex.replace('#', '');
+  const v = parseInt(h, 16);
+  return { r: (v >> 16) & 255, g: (v >> 8) & 255, b: v & 255 };
+}
+
+const colorRoot = document.getElementById('color-controls');
+const baseHex = ['e6ecf6','8a95a9','424a5a','f8fbff'];
+const baseA = [0.95,0.88,0.86,0.5];
+for (let i = 1; i <= 4; i++) {
+  const row = document.createElement('div');
+  row.className = 'row2';
+  row.innerHTML =
+    '<label><span class="caption">Color ' + i + '</span><input type="color" data-color="' + i + '" value="#' + baseHex[i-1] + '"></label>' +
+    '<label><span class="caption">Alpha ' + i + '</span><input type="range" data-alpha="' + i + '" min="0" max="1" step="0.01" value="' + baseA[i-1] + '"></label>';
+  colorRoot.appendChild(row);
+}
+
+colorRoot.addEventListener('input', (e) => {
+  const t = e.target;
+  if (t.matches('[data-color]')) {
+    const i = t.dataset.color;
+    const rgb = hexToRgb(t.value);
+    setVar('--color' + i + '-r', rgb.r);
+    setVar('--color' + i + '-g', rgb.g);
+    setVar('--color' + i + '-b', rgb.b);
+  }
+  if (t.matches('[data-alpha]')) {
+    setVar('--color' + t.dataset.alpha + '-a', t.value);
+  }
+});
+for (const el of colorRoot.querySelectorAll('[data-color],[data-alpha]')) {
+  el.dispatchEvent(new Event('input'));
+}
+
+function bindShadowColor(inputId, prefix) {
+  const input = document.getElementById(inputId);
+  const apply = () => {
+    const rgb = hexToRgb(input.value);
+    setVar('--' + prefix + '-r', rgb.r);
+    setVar('--' + prefix + '-g', rgb.g);
+    setVar('--' + prefix + '-b', rgb.b);
+  };
+  input.addEventListener('input', apply, { passive: true });
+  apply();
+}
+bindShadowColor('outer-shadow-color', 'outer-shadow');
+bindShadowColor('inner-shadow-color', 'inner-shadow');
+
+function updateFromScroll() {
+  const max = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+  const p = Math.min(1, Math.max(0, scrollY / max));
+  const angle = (state.manualLightAngle + p * 360 * state.scrollDrive) % 360;
+  setVar('--light-angle', angle.toFixed(3));
+  out('--light-angle', angle.toFixed(2));
+}
+
+addEventListener('scroll', updateFromScroll, { passive: true });
+updateFromScroll();
+  </script>
+</body>
+</html>
