@@ -2,534 +2,492 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Metal Border Generator PRO</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Metal Border Generator PRO - Layered</title>
   <style>
     :root {
-      --border-size: 8;
-      --radius: 28;
-
+      --border-size: 18;
+      --radius: 34;
       --base-angle: 24;
       --scroll-progress: 0;
       --scroll-drive: 1;
-      --light-elevation: 0.75;
+      --light-elevation: 0.72;
       --light-intensity: 1.2;
 
-      --conic-arms: 10;
-      --arm-width: 0.38;
-      --arm-contrast: 0.55;
-      --arm-spin: 1.3;
+      --base-gradient-type: 0;
+      --base-interp: 1.1;
+      --c1-r: 236; --c1-g: 240; --c1-b: 248; --c1-a: 0.95;
+      --c2-r: 154; --c2-g: 165; --c2-b: 184; --c2-a: 0.90;
+      --c3-r: 70;  --c3-g: 80;  --c3-b: 98;  --c3-a: 0.88;
+      --c4-r: 248; --c4-g: 252; --c4-b: 255; --c4-a: 0.55;
 
-      --bevel-outer: 0.85;
-      --bevel-inner: 0.72;
-      --bevel-softness: 0.5;
+      --bevel-outer-strength: 0.95;
+      --bevel-inner-strength: 0.85;
+      --bevel-width: 6;
+      --bevel-softness: 0.6;
+      --bevel-outer-offset: 0;
+      --bevel-inner-offset: 0;
+      --bevel-gradient-type: 0;
+      --bevel-outer-r: 255; --bevel-outer-g: 255; --bevel-outer-b: 255; --bevel-outer-a: 0.95;
+      --bevel-inner-r: 0; --bevel-inner-g: 0; --bevel-inner-b: 0; --bevel-inner-a: 0.88;
 
-      --roughness: 0.22;
+      --fresnel-strength: 0.5;
+      --fresnel-width: 0.3;
+      --fresnel-power: 3.2;
+      --fresnel-r: 210; --fresnel-g: 238; --fresnel-b: 255; --fresnel-a: 0.9;
+
+      --texture-type: 1;
       --texture-scale: 1.1;
-      --texture-strength: 0.28;
+      --texture-strength: 0.35;
+      --texture-roughness: 0.3;
+      --texture-r: 255; --texture-g: 255; --texture-b: 255; --texture-a: 0.75;
 
-      --c1-r: 242; --c1-g: 247; --c1-b: 255; --c1-a: 0.98;
-      --c2-r: 158; --c2-g: 171; --c2-b: 194; --c2-a: 0.85;
-      --c3-r: 64;  --c3-g: 74;  --c3-b: 92;  --c3-a: 0.88;
-      --c4-r: 255; --c4-g: 255; --c4-b: 255; --c4-a: 0.55;
-
-      --center-alpha: 0;
+      --arms-count: 10;
+      --arms-width: 0.32;
+      --arms-contrast: 0.52;
+      --arms-spin: 1.2;
 
       --outer-shadow-x: 0;
       --outer-shadow-y: 12;
-      --outer-shadow-blur: 32;
-      --outer-shadow-r: 0; --outer-shadow-g: 0; --outer-shadow-b: 0; --outer-shadow-a: 0.45;
+      --outer-shadow-blur: 28;
+      --outer-shadow-r: 0; --outer-shadow-g: 0; --outer-shadow-b: 0; --outer-shadow-a: 0.35;
 
-      --inner-shadow-x: 0;
-      --inner-shadow-y: 2;
-      --inner-shadow-blur: 20;
-      --inner-shadow-spread: 1;
-      --inner-shadow-r: 8; --inner-shadow-g: 10; --inner-shadow-b: 16; --inner-shadow-a: 0.62;
-
-      --mix-blend: normal;
-      --f-brightness: 1;
-      --f-contrast: 1.06;
-      --f-saturate: 1.12;
-      --f-hue: 0;
-      --f-sepia: 0;
-      --f-grayscale: 0;
-      --f-invert: 0;
-      --f-blur: 0;
+      --base-blend: normal;    --base-opacity: 1;    --base-brightness: 1; --base-contrast: 1; --base-saturate: 1.1; --base-hue: 0; --base-blur: 0;
+      --bevel-blend: screen;   --bevel-opacity: 1;   --bevel-brightness: 1; --bevel-contrast: 1; --bevel-saturate: 1; --bevel-hue: 0; --bevel-blur: 0;
+      --fresnel-blend: screen; --fresnel-opacity: .8;--fresnel-brightness: 1; --fresnel-contrast: 1; --fresnel-saturate: 1.2; --fresnel-hue: 0; --fresnel-blur: 0;
+      --texture-blend: overlay;--texture-opacity: .7;--texture-brightness: 1; --texture-contrast: 1; --texture-saturate: 1; --texture-hue: 0; --texture-blur: 0;
     }
 
-    @property --scroll-progress {
-      syntax: "<number>";
-      inherits: true;
-      initial-value: 0;
-    }
+    @property --scroll-progress { syntax: "<number>"; inherits: true; initial-value: 0; }
 
     * { box-sizing: border-box; }
     body {
       margin: 0;
       min-height: 280vh;
       font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      color: #edf2ff;
-      background: radial-gradient(circle at 15% 12%, #36405f 0%, #171a24 40%, #0b0d14 100%);
+      color: #f0f4ff;
+      background: radial-gradient(circle at 10% 10%, #324066 0, #171b2d 42%, #0c0f17 100%);
     }
-
-    .layout {
-      display: grid;
-      grid-template-columns: minmax(300px, 420px) minmax(0, 1fr);
-      gap: 1rem;
-      padding: 1rem;
-      align-items: start;
+    .layout { display:grid; grid-template-columns:minmax(320px,430px) 1fr; gap:1rem; padding:1rem; align-items:start; }
+    .panel {
+      position: sticky; top:.5rem; max-height:calc(100vh - 1rem); overflow:auto; padding:.9rem;
+      border-radius:16px; background:rgba(16,20,32,.86); border:1px solid rgba(255,255,255,.14); backdrop-filter: blur(10px);
     }
-
-    .controls {
-      position: sticky;
-      top: .5rem;
-      max-height: calc(100vh - 1rem);
-      overflow: auto;
-      border-radius: 16px;
-      padding: .9rem;
-      background: rgba(15, 19, 30, .86);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,.15);
-    }
-
-    h2 { margin: 0 0 .35rem; font-size: 1.1rem; }
-    .controls p { margin: 0 0 .75rem; font-size: .84rem; opacity: .86; }
-    .group { margin-top: .75rem; padding-top: .75rem; border-top: 1px solid rgba(255,255,255,.12); }
-    .group h3 { margin: 0 0 .5rem; font-size: .88rem; }
-    label { display:block; font-size:.79rem; margin-bottom:.42rem; }
-    .cap { display:flex; justify-content:space-between; gap:.5rem; margin-bottom:.1rem; }
+    h2 { margin:.1rem 0 .45rem; font-size:1.08rem; }
+    .panel p { margin:0 0 .7rem; font-size:.82rem; opacity:.84; }
+    .section { border-top:1px solid rgba(255,255,255,.12); padding-top:.7rem; margin-top:.7rem; }
+    .section h3 { margin:0 0 .45rem; font-size:.86rem; }
+    label { display:block; margin:.35rem 0; font-size:.77rem; }
+    .cap { display:flex; justify-content:space-between; gap:.4rem; margin-bottom:.1rem; }
     input[type="range"], select, input[type="color"] { width:100%; }
-    input[type="color"] { height: 38px; border: none; border-radius: 8px; background: transparent; }
-    .row2 { display:grid; grid-template-columns: 1fr 1fr; gap:.5rem; }
+    input[type="color"] { height:36px; border:none; border-radius:8px; background:transparent; }
+    .row2 { display:grid; grid-template-columns:1fr 1fr; gap:.5rem; }
 
-    .stage {
-      display:grid;
-      place-items:center;
-      min-height:95vh;
-      padding:1rem;
-    }
-
-    .card {
+    .stage { min-height:96vh; display:grid; place-items:center; padding:1rem; }
+    .frame {
       position: relative;
-      width: min(92vw, 860px);
-      min-height: min(62vh, 540px);
+      width:min(92vw,880px);
+      min-height:min(64vh,560px);
       border-radius: calc(var(--radius) * 1px);
+      overflow: hidden; /* keep all filters inside border box */
       isolation: isolate;
-      filter:
-        brightness(var(--f-brightness))
-        contrast(var(--f-contrast))
-        saturate(var(--f-saturate))
-        hue-rotate(calc(var(--f-hue) * 1deg))
-        sepia(var(--f-sepia))
-        grayscale(var(--f-grayscale))
-        invert(var(--f-invert))
-        blur(calc(var(--f-blur) * 1px));
-    }
-
-    /* Border is painted as a real ring directly by worklet (no CSS mask trick). */
-    .border-layer {
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      pointer-events: none;
-      background: paint(metal-border);
-      mix-blend-mode: var(--mix-blend);
-      box-shadow:
-        calc(var(--outer-shadow-x) * 1px)
-        calc(var(--outer-shadow-y) * 1px)
-        calc(var(--outer-shadow-blur) * 1px)
-        rgba(var(--outer-shadow-r), var(--outer-shadow-g), var(--outer-shadow-b), var(--outer-shadow-a));
-    }
-
-    .inner-layer {
-      position: absolute;
-      inset: calc(var(--border-size) * 1px);
-      border-radius: calc((var(--radius) - var(--border-size) * 0.5) * 1px);
-      pointer-events: none;
-      background: rgba(255,255,255,var(--center-alpha));
-      box-shadow:
-        inset calc(var(--inner-shadow-x) * 1px)
-        calc(var(--inner-shadow-y) * 1px)
-        calc(var(--inner-shadow-blur) * 1px)
-        calc(var(--inner-shadow-spread) * 1px)
-        rgba(var(--inner-shadow-r), var(--inner-shadow-g), var(--inner-shadow-b), var(--inner-shadow-a));
-    }
-
-    .content {
-      position: absolute;
-      inset: calc(var(--border-size) * 1px);
-      border-radius: calc((var(--radius) - var(--border-size) * 0.5) * 1px);
-      display:grid;
-      place-items:center;
-      text-align:center;
-      padding:1.2rem;
       background: transparent;
     }
 
-    .content h1 { margin:0; font-size:clamp(1.45rem,3vw,2.5rem); }
-    .content p { max-width:44ch; opacity:.88; }
-
-    @supports (animation-timeline: scroll()) {
-      body {
-        animation: prog linear both;
-        animation-timeline: scroll(root);
-        animation-range: 0% 100%;
-      }
-      @keyframes prog {
-        from { --scroll-progress: 0; }
-        to { --scroll-progress: 1; }
-      }
+    .border-part {
+      position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+      background: paint(metal-border-part);
     }
 
-    @media (max-width: 920px) {
-      .layout { grid-template-columns: 1fr; }
-      .controls {
-        position: fixed;
-        left: .55rem;
-        right: .55rem;
-        bottom: .55rem;
-        top: auto;
-        max-height: 46vh;
-        z-index: 20;
-      }
-      .stage { padding-bottom: 48vh; }
+    .part-base {
+      mix-blend-mode: var(--base-blend);
+      opacity: var(--base-opacity);
+      filter: brightness(var(--base-brightness)) contrast(var(--base-contrast)) saturate(var(--base-saturate)) hue-rotate(calc(var(--base-hue)*1deg)) blur(calc(var(--base-blur)*1px));
+      --part-id: 0;
+    }
+    .part-bevel {
+      mix-blend-mode: var(--bevel-blend);
+      opacity: var(--bevel-opacity);
+      filter: brightness(var(--bevel-brightness)) contrast(var(--bevel-contrast)) saturate(var(--bevel-saturate)) hue-rotate(calc(var(--bevel-hue)*1deg)) blur(calc(var(--bevel-blur)*1px));
+      --part-id: 1;
+    }
+    .part-fresnel {
+      mix-blend-mode: var(--fresnel-blend);
+      opacity: var(--fresnel-opacity);
+      filter: brightness(var(--fresnel-brightness)) contrast(var(--fresnel-contrast)) saturate(var(--fresnel-saturate)) hue-rotate(calc(var(--fresnel-hue)*1deg)) blur(calc(var(--fresnel-blur)*1px));
+      --part-id: 2;
+    }
+    .part-texture {
+      mix-blend-mode: var(--texture-blend);
+      opacity: var(--texture-opacity);
+      filter: brightness(var(--texture-brightness)) contrast(var(--texture-contrast)) saturate(var(--texture-saturate)) hue-rotate(calc(var(--texture-hue)*1deg)) blur(calc(var(--texture-blur)*1px));
+      --part-id: 3;
+    }
+
+    .shadow-layer {
+      position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+      box-shadow: calc(var(--outer-shadow-x)*1px) calc(var(--outer-shadow-y)*1px) calc(var(--outer-shadow-blur)*1px) rgba(var(--outer-shadow-r),var(--outer-shadow-g),var(--outer-shadow-b),var(--outer-shadow-a));
+    }
+
+    @supports (animation-timeline: scroll()) {
+      body { animation: prog linear both; animation-timeline: scroll(root); animation-range: 0% 100%; }
+      @keyframes prog { from { --scroll-progress: 0; } to { --scroll-progress: 1; } }
+    }
+
+    @media (max-width: 930px) {
+      .layout { grid-template-columns:1fr; }
+      .panel { position:fixed; left:.6rem; right:.6rem; bottom:.6rem; top:auto; max-height:47vh; z-index:20; }
+      .stage { padding-bottom:49vh; }
     }
   </style>
 </head>
 <body>
   <div class="layout">
-    <aside class="controls">
+    <aside class="panel">
       <h2>Metal Border Generator PRO</h2>
-      <p>Native CSS property animation for scroll (`--scroll-progress`) + fallback. Border conic is physically masked to ring only.</p>
+      <p>Every effect is a separate border part. Bevel edges have explicit edge offsets. No center text/no inner content layer.</p>
 
-      <div class="group">
-        <h3>Geometry + Light</h3>
-        <label><span class="cap">Border size <output data-out="--border-size"></output></span><input data-var="--border-size" type="range" min="0" max="96" step="0.1" value="8"></label>
-        <label><span class="cap">Radius <output data-out="--radius"></output></span><input data-var="--radius" type="range" min="0" max="120" step="1" value="28"></label>
+      <div class="section">
+        <h3>Global Geometry + Light</h3>
+        <label><span class="cap">Border size <output data-out="--border-size"></output></span><input data-var="--border-size" type="range" min="0" max="96" step="0.1" value="18"></label>
+        <label><span class="cap">Radius <output data-out="--radius"></output></span><input data-var="--radius" type="range" min="0" max="120" step="1" value="34"></label>
         <label><span class="cap">Base angle <output data-out="--base-angle"></output></span><input data-var="--base-angle" type="range" min="0" max="360" step="1" value="24"></label>
         <label><span class="cap">Scroll drive <output data-out="--scroll-drive"></output></span><input data-var="--scroll-drive" type="range" min="0" max="6" step="0.01" value="1"></label>
-        <label><span class="cap">Light elevation <output data-out="--light-elevation"></output></span><input data-var="--light-elevation" type="range" min="0" max="1" step="0.01" value="0.75"></label>
+        <label><span class="cap">Light elevation <output data-out="--light-elevation"></output></span><input data-var="--light-elevation" type="range" min="0" max="1" step="0.01" value="0.72"></label>
         <label><span class="cap">Light intensity <output data-out="--light-intensity"></output></span><input data-var="--light-intensity" type="range" min="0" max="3" step="0.01" value="1.2"></label>
       </div>
 
-      <div class="group">
-        <h3>Conic Arms + Bevel + Texture</h3>
-        <label><span class="cap">Arms <output data-out="--conic-arms"></output></span><input data-var="--conic-arms" type="range" min="1" max="36" step="1" value="10"></label>
-        <label><span class="cap">Arm width <output data-out="--arm-width"></output></span><input data-var="--arm-width" type="range" min="0.01" max="0.99" step="0.01" value="0.38"></label>
-        <label><span class="cap">Arm contrast <output data-out="--arm-contrast"></output></span><input data-var="--arm-contrast" type="range" min="0" max="1" step="0.01" value="0.55"></label>
-        <label><span class="cap">Arm spin <output data-out="--arm-spin"></output></span><input data-var="--arm-spin" type="range" min="0" max="5" step="0.01" value="1.3"></label>
-        <label><span class="cap">Bevel outer <output data-out="--bevel-outer"></output></span><input data-var="--bevel-outer" type="range" min="0" max="2" step="0.01" value="0.85"></label>
-        <label><span class="cap">Bevel inner <output data-out="--bevel-inner"></output></span><input data-var="--bevel-inner" type="range" min="0" max="2" step="0.01" value="0.72"></label>
-        <label><span class="cap">Bevel softness <output data-out="--bevel-softness"></output></span><input data-var="--bevel-softness" type="range" min="0.05" max="2" step="0.01" value="0.5"></label>
-        <label><span class="cap">Roughness <output data-out="--roughness"></output></span><input data-var="--roughness" type="range" min="0" max="1" step="0.01" value="0.22"></label>
-        <label><span class="cap">Texture scale <output data-out="--texture-scale"></output></span><input data-var="--texture-scale" type="range" min="0.1" max="10" step="0.01" value="1.1"></label>
-        <label><span class="cap">Texture strength <output data-out="--texture-strength"></output></span><input data-var="--texture-strength" type="range" min="0" max="1" step="0.01" value="0.28"></label>
+      <div class="section">
+        <h3>Part: Base Material (gradient/interpolation)</h3>
+        <label><span class="cap">Gradient type</span><select data-var="--base-gradient-type"><option value="0">Conic</option><option value="1">Linear</option><option value="2">Radial</option></select></label>
+        <label><span class="cap">Interpolation power <output data-out="--base-interp"></output></span><input data-var="--base-interp" type="range" min="0.2" max="3" step="0.01" value="1.1"></label>
+        <label><span class="cap">Conic arms <output data-out="--arms-count"></output></span><input data-var="--arms-count" type="range" min="1" max="40" step="1" value="10"></label>
+        <label><span class="cap">Arms width <output data-out="--arms-width"></output></span><input data-var="--arms-width" type="range" min="0.01" max="0.99" step="0.01" value="0.32"></label>
+        <label><span class="cap">Arms contrast <output data-out="--arms-contrast"></output></span><input data-var="--arms-contrast" type="range" min="0" max="1" step="0.01" value="0.52"></label>
+        <label><span class="cap">Arms spin <output data-out="--arms-spin"></output></span><input data-var="--arms-spin" type="range" min="0" max="6" step="0.01" value="1.2"></label>
+        <div id="base-colors"></div>
       </div>
 
-      <div class="group"><h3>Metal Colors + Alpha</h3><div id="colors"></div></div>
-
-      <div class="group">
-        <h3>Center + Shadows + Blend + Filters</h3>
-        <label><span class="cap">Center alpha (0=true transparent) <output data-out="--center-alpha"></output></span><input data-var="--center-alpha" type="range" min="0" max="1" step="0.01" value="0"></label>
-
+      <div class="section">
+        <h3>Part: Bevel (on border edges + offset control)</h3>
+        <label><span class="cap">Bevel gradient type</span><select data-var="--bevel-gradient-type"><option value="0">Linear</option><option value="1">Conic</option><option value="2">Radial</option></select></label>
+        <label><span class="cap">Outer strength <output data-out="--bevel-outer-strength"></output></span><input data-var="--bevel-outer-strength" type="range" min="0" max="2" step="0.01" value="0.95"></label>
+        <label><span class="cap">Inner strength <output data-out="--bevel-inner-strength"></output></span><input data-var="--bevel-inner-strength" type="range" min="0" max="2" step="0.01" value="0.85"></label>
+        <label><span class="cap">Bevel width <output data-out="--bevel-width"></output></span><input data-var="--bevel-width" type="range" min="0" max="48" step="0.1" value="6"></label>
+        <label><span class="cap">Softness <output data-out="--bevel-softness"></output></span><input data-var="--bevel-softness" type="range" min="0.05" max="2" step="0.01" value="0.6"></label>
+        <label><span class="cap">Outer edge offset <output data-out="--bevel-outer-offset"></output></span><input data-var="--bevel-outer-offset" type="range" min="-24" max="24" step="0.1" value="0"></label>
+        <label><span class="cap">Inner edge offset <output data-out="--bevel-inner-offset"></output></span><input data-var="--bevel-inner-offset" type="range" min="-24" max="24" step="0.1" value="0"></label>
         <div class="row2">
-          <label><span class="cap">Outer shadow color</span><input id="outer-color" type="color" value="#000000"></label>
-          <label><span class="cap">Inner shadow color</span><input id="inner-color" type="color" value="#080a10"></label>
+          <label><span class="cap">Outer bevel color</span><input id="bevel-outer-color" type="color" value="#ffffff"></label>
+          <label><span class="cap">Outer alpha <output data-out="--bevel-outer-a"></output></span><input data-var="--bevel-outer-a" type="range" min="0" max="1" step="0.01" value="0.95"></label>
+          <label><span class="cap">Inner bevel color</span><input id="bevel-inner-color" type="color" value="#000000"></label>
+          <label><span class="cap">Inner alpha <output data-out="--bevel-inner-a"></output></span><input data-var="--bevel-inner-a" type="range" min="0" max="1" step="0.01" value="0.88"></label>
         </div>
+      </div>
 
-        <label><span class="cap">Outer X <output data-out="--outer-shadow-x"></output></span><input data-var="--outer-shadow-x" type="range" min="-80" max="80" step="1" value="0"></label>
-        <label><span class="cap">Outer Y <output data-out="--outer-shadow-y"></output></span><input data-var="--outer-shadow-y" type="range" min="-80" max="80" step="1" value="12"></label>
-        <label><span class="cap">Outer blur <output data-out="--outer-shadow-blur"></output></span><input data-var="--outer-shadow-blur" type="range" min="0" max="160" step="1" value="32"></label>
-        <label><span class="cap">Outer alpha <output data-out="--outer-shadow-a"></output></span><input data-var="--outer-shadow-a" type="range" min="0" max="1" step="0.01" value="0.45"></label>
+      <div class="section">
+        <h3>Part: Fresnel</h3>
+        <label><span class="cap">Strength <output data-out="--fresnel-strength"></output></span><input data-var="--fresnel-strength" type="range" min="0" max="2" step="0.01" value="0.5"></label>
+        <label><span class="cap">Width <output data-out="--fresnel-width"></output></span><input data-var="--fresnel-width" type="range" min="0" max="1" step="0.01" value="0.3"></label>
+        <label><span class="cap">Power <output data-out="--fresnel-power"></output></span><input data-var="--fresnel-power" type="range" min="0.2" max="8" step="0.01" value="3.2"></label>
+        <div class="row2">
+          <label><span class="cap">Fresnel color</span><input id="fresnel-color" type="color" value="#d2eeff"></label>
+          <label><span class="cap">Fresnel alpha <output data-out="--fresnel-a"></output></span><input data-var="--fresnel-a" type="range" min="0" max="1" step="0.01" value="0.9"></label>
+        </div>
+      </div>
 
-        <label><span class="cap">Inner X <output data-out="--inner-shadow-x"></output></span><input data-var="--inner-shadow-x" type="range" min="-80" max="80" step="1" value="0"></label>
-        <label><span class="cap">Inner Y <output data-out="--inner-shadow-y"></output></span><input data-var="--inner-shadow-y" type="range" min="-80" max="80" step="1" value="2"></label>
-        <label><span class="cap">Inner blur <output data-out="--inner-shadow-blur"></output></span><input data-var="--inner-shadow-blur" type="range" min="0" max="160" step="1" value="20"></label>
-        <label><span class="cap">Inner spread <output data-out="--inner-shadow-spread"></output></span><input data-var="--inner-shadow-spread" type="range" min="-80" max="80" step="1" value="1"></label>
-        <label><span class="cap">Inner alpha <output data-out="--inner-shadow-a"></output></span><input data-var="--inner-shadow-a" type="range" min="0" max="1" step="0.01" value="0.62"></label>
+      <div class="section">
+        <h3>Part: Texture (metal finishes)</h3>
+        <label><span class="cap">Texture type</span><select data-var="--texture-type"><option value="0">None</option><option value="1">Brushed</option><option value="2">Cast Noise</option><option value="3">Hammered</option><option value="4">Anisotropic Cross</option></select></label>
+        <label><span class="cap">Scale <output data-out="--texture-scale"></output></span><input data-var="--texture-scale" type="range" min="0.1" max="8" step="0.01" value="1.1"></label>
+        <label><span class="cap">Strength <output data-out="--texture-strength"></output></span><input data-var="--texture-strength" type="range" min="0" max="1" step="0.01" value="0.35"></label>
+        <label><span class="cap">Roughness <output data-out="--texture-roughness"></output></span><input data-var="--texture-roughness" type="range" min="0" max="1" step="0.01" value="0.3"></label>
+        <div class="row2">
+          <label><span class="cap">Texture tint</span><input id="texture-color" type="color" value="#ffffff"></label>
+          <label><span class="cap">Texture alpha <output data-out="--texture-a"></output></span><input data-var="--texture-a" type="range" min="0" max="1" step="0.01" value="0.75"></label>
+        </div>
+      </div>
 
-        <label><span class="cap">Blend mode</span>
-          <select data-var="--mix-blend">
-            <option>normal</option><option>overlay</option><option>screen</option><option>multiply</option>
-            <option>soft-light</option><option>hard-light</option><option>color-dodge</option><option>color-burn</option>
-            <option>difference</option><option>luminosity</option>
-          </select>
-        </label>
-
-        <label><span class="cap">Brightness <output data-out="--f-brightness"></output></span><input data-var="--f-brightness" type="range" min="0.3" max="3" step="0.01" value="1"></label>
-        <label><span class="cap">Contrast <output data-out="--f-contrast"></output></span><input data-var="--f-contrast" type="range" min="0.2" max="4" step="0.01" value="1.06"></label>
-        <label><span class="cap">Saturate <output data-out="--f-saturate"></output></span><input data-var="--f-saturate" type="range" min="0" max="4" step="0.01" value="1.12"></label>
-        <label><span class="cap">Hue <output data-out="--f-hue"></output></span><input data-var="--f-hue" type="range" min="0" max="360" step="1" value="0"></label>
-        <label><span class="cap">Sepia <output data-out="--f-sepia"></output></span><input data-var="--f-sepia" type="range" min="0" max="1" step="0.01" value="0"></label>
-        <label><span class="cap">Grayscale <output data-out="--f-grayscale"></output></span><input data-var="--f-grayscale" type="range" min="0" max="1" step="0.01" value="0"></label>
-        <label><span class="cap">Invert <output data-out="--f-invert"></output></span><input data-var="--f-invert" type="range" min="0" max="1" step="0.01" value="0"></label>
-        <label><span class="cap">Blur <output data-out="--f-blur"></output></span><input data-var="--f-blur" type="range" min="0" max="12" step="0.1" value="0"></label>
+      <div class="section">
+        <h3>Per-Part Mix / Filters</h3>
+        <div id="part-filters"></div>
       </div>
     </aside>
 
     <main class="stage">
-      <div class="card">
-        <div class="border-layer"></div>
-        <div class="inner-layer"></div>
-        <div class="content">
-          <div>
-            <h1>Metal Border Worklet PRO</h1>
-            <p>Conic light is forced to border ring only. Native CSS scroll-driven property animation when supported, JS fallback when not.</p>
-          </div>
-        </div>
+      <div class="frame">
+        <div class="border-part part-base"></div>
+        <div class="border-part part-bevel"></div>
+        <div class="border-part part-fresnel"></div>
+        <div class="border-part part-texture"></div>
+        <div class="shadow-layer"></div>
       </div>
     </main>
   </div>
 
-  <script>
-    const WORKLET = `
-class MetalBorderPainter {
+<script>
+const WORKLET = `
+class MetalBorderPartPainter {
   static get inputProperties() {
     return [
-      '--border-size','--radius',
+      '--part-id','--border-size','--radius',
       '--base-angle','--scroll-progress','--scroll-drive','--light-elevation','--light-intensity',
-      '--conic-arms','--arm-width','--arm-contrast','--arm-spin',
-      '--bevel-outer','--bevel-inner','--bevel-softness',
-      '--roughness','--texture-scale','--texture-strength',
-      '--c1-r','--c1-g','--c1-b','--c1-a',
-      '--c2-r','--c2-g','--c2-b','--c2-a',
-      '--c3-r','--c3-g','--c3-b','--c3-a',
-      '--c4-r','--c4-g','--c4-b','--c4-a'
+      '--base-gradient-type','--base-interp','--arms-count','--arms-width','--arms-contrast','--arms-spin',
+      '--bevel-outer-strength','--bevel-inner-strength','--bevel-width','--bevel-softness','--bevel-outer-offset','--bevel-inner-offset','--bevel-gradient-type',
+      '--fresnel-strength','--fresnel-width','--fresnel-power',
+      '--texture-type','--texture-scale','--texture-strength','--texture-roughness',
+      '--c1-r','--c1-g','--c1-b','--c1-a','--c2-r','--c2-g','--c2-b','--c2-a','--c3-r','--c3-g','--c3-b','--c3-a','--c4-r','--c4-g','--c4-b','--c4-a',
+      '--bevel-outer-r','--bevel-outer-g','--bevel-outer-b','--bevel-outer-a','--bevel-inner-r','--bevel-inner-g','--bevel-inner-b','--bevel-inner-a',
+      '--fresnel-r','--fresnel-g','--fresnel-b','--fresnel-a',
+      '--texture-r','--texture-g','--texture-b','--texture-a'
     ];
   }
-  p(props, n, d=0){ const v = parseFloat((props.get(n) || '').toString()); return Number.isFinite(v) ? v : d; }
-  c(props, i){ return [this.p(props,'--c'+i+'-r',255),this.p(props,'--c'+i+'-g',255),this.p(props,'--c'+i+'-b',255),this.p(props,'--c'+i+'-a',1)]; }
-  hash(x,y){ return (Math.sin(x*12.9898+y*78.233)*43758.5453)%1; }
+  p(props,n,d=0){ const v=parseFloat((props.get(n)||'').toString()); return Number.isFinite(v)?v:d; }
+  rgba(props,prefix){ return [this.p(props,prefix+'-r',255),this.p(props,prefix+'-g',255),this.p(props,prefix+'-b',255),this.p(props,prefix+'-a',1)]; }
+  hash(x,y){ return (Math.sin(x*127.1+y*311.7)*43758.5453)%1; }
+
+  strokeRoundRect(ctx, inset, w, h, radius, lineWidth) {
+    if (lineWidth <= 0 || w <= inset*2 || h <= inset*2) return;
+    ctx.lineWidth = lineWidth;
+    ctx.beginPath();
+    ctx.roundRect(inset, inset, Math.max(0,w-inset*2), Math.max(0,h-inset*2), Math.max(0,radius-inset));
+    ctx.stroke();
+  }
 
   paint(ctx, size, props) {
+    const part = Math.floor(this.p(props,'--part-id',0));
     const w=size.width, h=size.height;
-    const border=Math.max(0, this.p(props,'--border-size',8));
+    const border=Math.max(0, this.p(props,'--border-size',14));
     if (border <= 0.01) return;
-
     const radius=Math.max(0, this.p(props,'--radius',24));
-    const base=this.p(props,'--base-angle',0);
-    const prog=this.p(props,'--scroll-progress',0);
-    const drive=this.p(props,'--scroll-drive',1);
+
+    const base=this.p(props,'--base-angle',0), prog=this.p(props,'--scroll-progress',0), drive=this.p(props,'--scroll-drive',1);
     const angle=((base + prog*360*drive)%360)*(Math.PI/180);
+    const elev=this.p(props,'--light-elevation',0.72), inten=this.p(props,'--light-intensity',1.2);
 
-    const elev=this.p(props,'--light-elevation',0.75);
-    const inten=this.p(props,'--light-intensity',1.2);
-
-    const arms=Math.max(1, Math.floor(this.p(props,'--conic-arms',10)));
-    const armW=Math.max(0.01, Math.min(0.99, this.p(props,'--arm-width',0.38)));
-    const armC=this.p(props,'--arm-contrast',0.55);
-    const armSpin=this.p(props,'--arm-spin',1.3);
-
-    const bOuter=this.p(props,'--bevel-outer',0.85);
-    const bInner=this.p(props,'--bevel-inner',0.72);
-    const bSoft=Math.max(0.03, this.p(props,'--bevel-softness',0.5));
-
-    const rough=this.p(props,'--roughness',0.22);
-    const texS=Math.max(0.1, this.p(props,'--texture-scale',1.1));
-    const texA=this.p(props,'--texture-strength',0.28);
-
-    const c1=this.c(props,1), c2=this.c(props,2), c3=this.c(props,3), c4=this.c(props,4);
-
+    const midInset=border*0.5;
     const cx=w*0.5, cy=h*0.5;
-    const midInset = border * 0.5;
-    const rw = Math.max(0, w - midInset*2);
-    const rh = Math.max(0, h - midInset*2);
-    const rr = Math.max(0, radius - midInset);
 
-    ctx.save();
+    if (part===0) {
+      const c1=this.rgba(props,'--c1'), c2=this.rgba(props,'--c2'), c3=this.rgba(props,'--c3'), c4=this.rgba(props,'--c4');
+      const gType=Math.floor(this.p(props,'--base-gradient-type',0));
+      const interp=this.p(props,'--base-interp',1.1);
+      let grad;
+      if (gType===1) {
+        grad=ctx.createLinearGradient(cx-Math.cos(angle)*cx, cy-Math.sin(angle)*cy, cx+Math.cos(angle)*cx, cy+Math.sin(angle)*cy);
+      } else if (gType===2) {
+        grad=ctx.createRadialGradient(cx,cy,border*0.25,cx,cy,Math.max(w,h)*0.6);
+      } else {
+        grad=ctx.createConicGradient(angle,cx,cy);
+      }
+      const p2=Math.pow(0.25,interp), p3=Math.pow(0.62,interp);
+      grad.addColorStop(0,'rgba('+c1[0]+','+c1[1]+','+c1[2]+','+c1[3]+')');
+      grad.addColorStop(Math.min(1,p2),'rgba('+c2[0]+','+c2[1]+','+c2[2]+','+c2[3]+')');
+      grad.addColorStop(Math.min(1,p3),'rgba('+c3[0]+','+c3[1]+','+c3[2]+','+c3[3]+')');
+      grad.addColorStop(1,'rgba('+c4[0]+','+c4[1]+','+c4[2]+','+c4[3]+')');
 
-    // Base conic on border stroke only (never center fill)
-    const baseGrad = ctx.createConicGradient(angle, cx, cy);
-    baseGrad.addColorStop(0.00, 'rgba('+c1[0]+','+c1[1]+','+c1[2]+','+c1[3]+')');
-    baseGrad.addColorStop(0.25, 'rgba('+c2[0]+','+c2[1]+','+c2[2]+','+c2[3]+')');
-    baseGrad.addColorStop(0.62, 'rgba('+c3[0]+','+c3[1]+','+c3[2]+','+c3[3]+')');
-    baseGrad.addColorStop(1.00, 'rgba('+c4[0]+','+c4[1]+','+c4[2]+','+c4[3]+')');
+      ctx.strokeStyle=grad;
+      this.strokeRoundRect(ctx, midInset, w, h, radius, border);
 
-    ctx.strokeStyle = baseGrad;
-    ctx.lineWidth = border;
-    ctx.beginPath();
-    ctx.roundRect(midInset, midInset, rw, rh, rr);
-    ctx.stroke();
-
-    // Multi-arm conic overlay on border stroke only
-    const armGrad = ctx.createConicGradient(angle*armSpin, cx, cy);
-    for (let i=0;i<arms;i++) {
-      const s=i/arms;
-      const m=(i+armW*0.5)/arms;
-      const e=(i+armW)/arms;
-      armGrad.addColorStop(s%1, 'rgba(255,255,255,0)');
-      armGrad.addColorStop(m%1, 'rgba(255,255,255,'+(0.3*armC)+')');
-      armGrad.addColorStop(e%1, 'rgba(0,0,0,'+(0.16*armC)+')');
+      const arms=Math.max(1,Math.floor(this.p(props,'--arms-count',10)));
+      const aw=Math.max(0.01,Math.min(0.99,this.p(props,'--arms-width',0.32)));
+      const ac=this.p(props,'--arms-contrast',0.52);
+      const spin=this.p(props,'--arms-spin',1.2);
+      const arm=ctx.createConicGradient(angle*spin,cx,cy);
+      for(let i=0;i<arms;i++){
+        const s=i/arms,m=(i+aw*0.5)/arms,e=(i+aw)/arms;
+        arm.addColorStop(s%1,'rgba(255,255,255,0)');
+        arm.addColorStop(m%1,'rgba(255,255,255,'+(0.3*ac)+')');
+        arm.addColorStop(e%1,'rgba(0,0,0,'+(0.16*ac)+')');
+      }
+      ctx.globalCompositeOperation='overlay';
+      ctx.strokeStyle=arm;
+      this.strokeRoundRect(ctx, midInset, w, h, radius, border);
+      ctx.globalCompositeOperation='source-over';
+      return;
     }
-    ctx.globalCompositeOperation='overlay';
-    ctx.strokeStyle=armGrad;
-    ctx.lineWidth=border;
-    ctx.beginPath();
-    ctx.roundRect(midInset, midInset, rw, rh, rr);
-    ctx.stroke();
-    ctx.globalCompositeOperation='source-over';
 
-    // Bevel strictly on border ring (outer edge + inner edge)
-    const lx=Math.cos(angle), ly=Math.sin(angle);
-    const g0x=cx-lx*cx, g0y=cy-ly*cy;
-    const g1x=cx+lx*cx, g1y=cy+ly*cy;
+    if (part===1) {
+      const bo=this.p(props,'--bevel-outer-strength',0.95);
+      const bi=this.p(props,'--bevel-inner-strength',0.85);
+      const bw=Math.max(0.2,this.p(props,'--bevel-width',6));
+      const bs=Math.max(0.05,this.p(props,'--bevel-softness',0.6));
+      const oOff=this.p(props,'--bevel-outer-offset',0);
+      const iOff=this.p(props,'--bevel-inner-offset',0);
+      const gt=Math.floor(this.p(props,'--bevel-gradient-type',0));
+      const oc=this.rgba(props,'--bevel-outer');
+      const ic=this.rgba(props,'--bevel-inner');
 
-    const outerHi = ctx.createLinearGradient(g0x,g0y,g1x,g1y);
-    outerHi.addColorStop(0, 'rgba(255,255,255,0)');
-    outerHi.addColorStop(1, 'rgba(255,255,255,'+(0.58*bOuter*inten*(0.65+elev*0.5))+')');
-
-    const innerLo = ctx.createLinearGradient(g0x,g0y,g1x,g1y);
-    innerLo.addColorStop(0, 'rgba(0,0,0,'+(0.56*bInner)+')');
-    innerLo.addColorStop(1, 'rgba(0,0,0,0)');
-
-    const outerW = Math.max(0.6, border * 0.5);
-    const innerW = Math.max(0.6, border * 0.5);
-    const bevelSteps = Math.max(1, Math.floor(Math.min(6, border)));
-
-    for (let i=0; i<bevelSteps; i++) {
-      const t = i / Math.max(1, bevelSteps - 1);
-      const fall = Math.pow(1 - t, 1.15 / bSoft);
-
-      // Outer edge highlight stroke
-      const outerInset = (outerW * 0.5) + i * 0.22;
-      ctx.strokeStyle = outerHi;
-      ctx.globalAlpha = fall * 0.58;
-      ctx.lineWidth = outerW / Math.max(1, bevelSteps * 0.35);
-      ctx.beginPath();
-      ctx.roundRect(outerInset, outerInset, Math.max(0,w-outerInset*2), Math.max(0,h-outerInset*2), Math.max(0,radius-outerInset));
-      ctx.stroke();
-
-      // Inner edge shadow stroke
-      const innerInset = border - (innerW * 0.5) - i * 0.22;
-      ctx.strokeStyle = innerLo;
-      ctx.globalAlpha = fall * 0.54;
-      ctx.lineWidth = innerW / Math.max(1, bevelSteps * 0.35);
-      ctx.beginPath();
-      ctx.roundRect(innerInset, innerInset, Math.max(0,w-innerInset*2), Math.max(0,h-innerInset*2), Math.max(0,radius-innerInset));
-      ctx.stroke();
-    }
-    ctx.globalAlpha = 1;
-
-    // Texture on border ring only: jittered short arc strokes around border midline
-    const perim = Math.max(1, 2*(rw+rh));
-    const segs = Math.min(520, Math.floor(perim * (0.12 + texS * 0.06)));
-    const texAlpha = texA * (0.03 + rough * 0.14);
-    ctx.strokeStyle = 'rgba(255,255,255,'+texAlpha+')';
-    ctx.lineWidth = Math.max(0.35, border * 0.08);
-
-    for (let i=0; i<segs; i++) {
-      const u0 = (i + this.hash(i, 17.1) * 0.25) / segs;
-      const u1 = u0 + 0.005 + this.hash(i, 39.7) * 0.01;
-
-      const pnt = (u) => {
-        const q = (u % 1 + 1) % 1;
-        const side = Math.floor(q * 4);
-        const t = (q * 4) - side;
-        if (side === 0) return [midInset + rw * t, midInset];
-        if (side === 1) return [midInset + rw, midInset + rh * t];
-        if (side === 2) return [midInset + rw * (1 - t), midInset + rh];
-        return [midInset, midInset + rh * (1 - t)];
+      const gx0=cx-Math.cos(angle)*cx, gy0=cy-Math.sin(angle)*cy, gx1=cx+Math.cos(angle)*cx, gy1=cy+Math.sin(angle)*cy;
+      const makeGrad = (isOuter) => {
+        if (gt===1) return ctx.createConicGradient(angle,cx,cy);
+        if (gt===2) return ctx.createRadialGradient(cx,cy,border*0.2,cx,cy,Math.max(w,h)*0.55);
+        return ctx.createLinearGradient(gx0,gy0,gx1,gy1);
       };
+      const gOuter=makeGrad(true), gInner=makeGrad(false);
+      gOuter.addColorStop(0,'rgba('+oc[0]+','+oc[1]+','+oc[2]+',0)');
+      gOuter.addColorStop(1,'rgba('+oc[0]+','+oc[1]+','+oc[2]+','+(oc[3]*bo*inten*(0.6+elev*0.4))+')');
+      gInner.addColorStop(0,'rgba('+ic[0]+','+ic[1]+','+ic[2]+','+(ic[3]*bi)+')');
+      gInner.addColorStop(1,'rgba('+ic[0]+','+ic[1]+','+ic[2]+',0)');
 
-      const a = pnt(u0), b = pnt(u1);
-      const nx = (this.hash(i, 55.3)-0.5) * border * 0.35;
-      const ny = (this.hash(i, 73.9)-0.5) * border * 0.35;
-      ctx.beginPath();
-      ctx.moveTo(a[0]+nx, a[1]+ny);
-      ctx.lineTo(b[0]+nx, b[1]+ny);
-      ctx.stroke();
+      const steps=Math.max(1,Math.floor(Math.min(10,bw)));
+      for(let i=0;i<steps;i++){
+        const t=i/Math.max(1,steps-1);
+        const fall=Math.pow(1-t,1.15/bs);
+
+        const ow=Math.max(0.4, bw/steps);
+        const outerInset=Math.max(0.1, ow*0.5 + i*ow + oOff);
+        ctx.strokeStyle=gOuter;
+        ctx.globalAlpha=fall;
+        this.strokeRoundRect(ctx, outerInset, w, h, radius, ow);
+
+        const iw=Math.max(0.4, bw/steps);
+        const innerInset=Math.max(0.1, border - (iw*0.5 + i*iw) + iOff);
+        ctx.strokeStyle=gInner;
+        ctx.globalAlpha=fall;
+        this.strokeRoundRect(ctx, innerInset, w, h, radius, iw);
+      }
+      ctx.globalAlpha=1;
+      return;
     }
 
-    ctx.restore();
+    if (part===2) {
+      const fs=this.p(props,'--fresnel-strength',0.5);
+      if (fs<=0) return;
+      const fw=this.p(props,'--fresnel-width',0.3);
+      const fp=Math.max(0.2,this.p(props,'--fresnel-power',3.2));
+      const fc=this.rgba(props,'--fresnel');
+
+      const steps=Math.max(10,Math.floor(border*2));
+      for(let i=0;i<steps;i++){
+        const t=i/steps;
+        const edge=Math.abs((t-0.5)/0.5);
+        const fres=Math.pow(1-edge,fp)*fs;
+        const alpha=fres*Math.max(0,1-Math.abs(t-fw));
+        if(alpha<=0.0005) continue;
+        ctx.strokeStyle='rgba('+fc[0]+','+fc[1]+','+fc[2]+','+(fc[3]*alpha)+')';
+        const inset=t*border;
+        this.strokeRoundRect(ctx,inset+0.4,w,h,radius,Math.max(0.5,border/steps+0.25));
+      }
+      return;
+    }
+
+    if (part===3) {
+      const tt=Math.floor(this.p(props,'--texture-type',1));
+      if (tt===0) return;
+      const ts=Math.max(0.1,this.p(props,'--texture-scale',1.1));
+      const ta=this.p(props,'--texture-strength',0.35);
+      const tr=this.p(props,'--texture-roughness',0.3);
+      const tc=this.rgba(props,'--texture');
+      const perim=Math.max(1,2*((w-border)+(h-border)));
+      const count=Math.min(1200,Math.floor(perim*(0.10+ts*0.08)));
+      ctx.strokeStyle='rgba('+tc[0]+','+tc[1]+','+tc[2]+','+(tc[3]*ta*0.28)+')';
+      ctx.fillStyle='rgba('+tc[0]+','+tc[1]+','+tc[2]+','+(tc[3]*ta*0.24)+')';
+      for(let i=0;i<count;i++){
+        const u=i/count;
+        const side=Math.floor(u*4), t=(u*4)-side;
+        let x=0,y=0;
+        const mi=midInset;
+        const rw=Math.max(1,w-mi*2), rh=Math.max(1,h-mi*2);
+        if(side===0){x=mi+rw*t;y=mi;} else if(side===1){x=mi+rw;y=mi+rh*t;} else if(side===2){x=mi+rw*(1-t);y=mi+rh;} else {x=mi;y=mi+rh*(1-t);}        
+        const nx=(this.hash(i,13.1)-0.5)*border*0.5;
+        const ny=(this.hash(i,27.7)-0.5)*border*0.5;
+        if(tt===1){ // brushed
+          const len=1.5 + this.hash(i,55.1)*border*0.35;
+          ctx.beginPath();
+          ctx.moveTo(x+nx,y+ny);
+          ctx.lineTo(x+nx+Math.cos(angle)*len,y+ny+Math.sin(angle)*len);
+          ctx.stroke();
+        } else if(tt===2){ // cast noise
+          const r=0.35 + this.hash(i,41.3)*1.3*tr;
+          ctx.beginPath(); ctx.arc(x+nx,y+ny,r,0,Math.PI*2); ctx.fill();
+        } else if(tt===3){ // hammered
+          const r=0.45 + this.hash(i,71.9)*2.1*tr;
+          ctx.beginPath(); ctx.arc(x+nx,y+ny,r,0,Math.PI*2); ctx.stroke();
+        } else { // anisotropic cross
+          const l=1 + this.hash(i,62.2)*2.4;
+          ctx.beginPath(); ctx.moveTo(x+nx-l,y+ny); ctx.lineTo(x+nx+l,y+ny); ctx.moveTo(x+nx,y+ny-l); ctx.lineTo(x+nx,y+ny+l); ctx.stroke();
+        }
+      }
+    }
   }
 }
-registerPaint('metal-border', MetalBorderPainter);
+registerPaint('metal-border-part', MetalBorderPartPainter);
 `;
 
-(async () => {
-  if (!('paintWorklet' in CSS)) {
-    alert('CSS Paint API not supported in this browser.');
-    return;
-  }
-  const blob = new Blob([WORKLET], { type: 'text/javascript' });
+(async()=>{
+  if (!('paintWorklet' in CSS)) return alert('CSS Paint API not supported in this browser.');
+  const blob=new Blob([WORKLET],{type:'text/javascript'});
   await CSS.paintWorklet.addModule(URL.createObjectURL(blob));
 })();
 
-const root = document.documentElement;
-const inputs = document.querySelectorAll('[data-var]');
-const outputs = document.querySelectorAll('[data-out]');
+const root=document.documentElement;
+const controls=document.querySelectorAll('[data-var]');
+const outputs=document.querySelectorAll('[data-out]');
 
-function setVar(name, value){ root.style.setProperty(name, String(value)); }
-function setOut(name, value){ const el=document.querySelector('[data-out="'+name+'"]'); if (el) el.textContent=String(value); }
-
-inputs.forEach((el) => {
-  const key = el.dataset.var;
-  const apply = () => { setVar(key, el.value); setOut(key, el.value); };
-  el.addEventListener('input', apply, { passive: true });
+function setVar(k,v){ root.style.setProperty(k,String(v)); }
+function setOut(k,v){ const o=document.querySelector('[data-out="'+k+'"]'); if(o)o.textContent=String(v); }
+controls.forEach(el=>{
+  const key=el.dataset.var;
+  const apply=()=>{ setVar(key,el.value); setOut(key,el.value); };
+  el.addEventListener('input',apply,{passive:true});
   apply();
 });
-outputs.forEach((el) => {
-  if (!el.textContent) {
-    const k=el.dataset.out;
-    el.textContent=getComputedStyle(root).getPropertyValue(k).trim();
-  }
-});
+outputs.forEach(o=>{ if(!o.textContent) o.textContent=getComputedStyle(root).getPropertyValue(o.dataset.out).trim(); });
 
-// Fallback for browsers without scroll-timeline support
-const hasScrollTimeline = CSS.supports('animation-timeline: scroll()');
-if (!hasScrollTimeline) {
-  let rafId = 0;
-  const updateScrollProgress = () => {
-    rafId = 0;
-    const max = Math.max(1, document.documentElement.scrollHeight - innerHeight);
-    const p = Math.max(0, Math.min(1, scrollY / max));
-    setVar('--scroll-progress', p.toFixed(6));
-  };
-  const onScroll = () => {
-    if (rafId) return;
-    rafId = requestAnimationFrame(updateScrollProgress);
-  };
-  addEventListener('scroll', onScroll, { passive: true });
-  updateScrollProgress();
+const hasScrollTimeline=CSS.supports('animation-timeline: scroll()');
+if(!hasScrollTimeline){
+  let raf=0;
+  const tick=()=>{ raf=0; const max=Math.max(1,document.documentElement.scrollHeight-innerHeight); const p=Math.max(0,Math.min(1,scrollY/max)); setVar('--scroll-progress',p.toFixed(6)); };
+  addEventListener('scroll',()=>{ if(!raf) raf=requestAnimationFrame(tick); },{passive:true});
+  tick();
 }
 
 function hexToRgb(hex){ const v=parseInt(hex.replace('#',''),16); return {r:(v>>16)&255,g:(v>>8)&255,b:v&255}; }
-function bindShadowPicker(id, prefix){
+function bindColor(id,prefix){
   const el=document.getElementById(id);
-  const apply=()=>{ const c=hexToRgb(el.value); setVar('--'+prefix+'-r', c.r); setVar('--'+prefix+'-g', c.g); setVar('--'+prefix+'-b', c.b); };
-  el.addEventListener('input', apply, { passive: true });
-  apply();
+  const fn=()=>{ const c=hexToRgb(el.value); setVar(prefix+'-r',c.r); setVar(prefix+'-g',c.g); setVar(prefix+'-b',c.b); };
+  el.addEventListener('input',fn,{passive:true}); fn();
 }
-bindShadowPicker('outer-color','outer-shadow');
-bindShadowPicker('inner-color','inner-shadow');
+bindColor('bevel-outer-color','--bevel-outer');
+bindColor('bevel-inner-color','--bevel-inner');
+bindColor('fresnel-color','--fresnel');
+bindColor('texture-color','--texture');
 
-const colorHost = document.getElementById('colors');
-const defaults = [
-  {hex:'f2f7ff', a:0.98},
-  {hex:'9eabc2', a:0.85},
-  {hex:'404a5c', a:0.88},
-  {hex:'ffffff', a:0.55},
-];
-for (let i=1;i<=4;i++) {
+const colorHost=document.getElementById('base-colors');
+const stops=[['c1','ecf0f8',0.95],['c2','9aa5b8',0.90],['c3','465062',0.88],['c4','f8fcff',0.55]];
+for(let i=0;i<stops.length;i++){
+  const [id,hex,a]=stops[i];
   const row=document.createElement('div');
   row.className='row2';
-  row.innerHTML=
-    '<label><span class="cap">Color '+i+'</span><input type="color" data-color="'+i+'" value="#'+defaults[i-1].hex+'"></label>'+
-    '<label><span class="cap">Alpha '+i+'</span><input type="range" data-alpha="'+i+'" min="0" max="1" step="0.01" value="'+defaults[i-1].a+'"></label>';
+  row.innerHTML='<label><span class="cap">Stop '+(i+1)+' Color</span><input type="color" data-stop="'+id+'" value="#'+hex+'"></label>'+
+                '<label><span class="cap">Stop '+(i+1)+' Alpha</span><input type="range" data-stop-alpha="'+id+'" min="0" max="1" step="0.01" value="'+a+'"></label>';
   colorHost.appendChild(row);
 }
-colorHost.addEventListener('input', (e) => {
+colorHost.addEventListener('input',e=>{
   const t=e.target;
-  if (t.matches('[data-color]')) {
-    const i=t.dataset.color;
-    const c=hexToRgb(t.value);
-    setVar('--c'+i+'-r', c.r); setVar('--c'+i+'-g', c.g); setVar('--c'+i+'-b', c.b);
-  }
-  if (t.matches('[data-alpha]')) {
-    setVar('--c'+t.dataset.alpha+'-a', t.value);
-  }
+  if(t.matches('[data-stop]')){ const id=t.dataset.stop; const c=hexToRgb(t.value); setVar('--'+id+'-r',c.r); setVar('--'+id+'-g',c.g); setVar('--'+id+'-b',c.b); }
+  if(t.matches('[data-stop-alpha]')){ setVar('--'+t.dataset.stopAlpha+'-a', t.value); }
 });
-for (const el of colorHost.querySelectorAll('[data-color],[data-alpha]')) el.dispatchEvent(new Event('input'));
-  </script>
+for(const el of colorHost.querySelectorAll('[data-stop],[data-stop-alpha]')) el.dispatchEvent(new Event('input'));
+
+const filterHost=document.getElementById('part-filters');
+const parts=[['base','Base'],['bevel','Bevel'],['fresnel','Fresnel'],['texture','Texture']];
+const blendOpts=['normal','overlay','screen','multiply','soft-light','hard-light','color-dodge','color-burn','difference','luminosity'];
+for(const [id,title] of parts){
+  const block=document.createElement('div');
+  block.className='section';
+  block.innerHTML='\n    <h3>'+title+' Mix/Filter</h3>\n    <label><span class="cap">Blend</span><select data-var="--'+id+'-blend">'+blendOpts.map(v=>'<option>'+v+'</option>').join('')+'</select></label>\n    <label><span class="cap">Opacity <output data-out="--'+id+'-opacity"></output></span><input data-var="--'+id+'-opacity" type="range" min="0" max="1" step="0.01" value="'+(id==='base'?'1':id==='bevel'?'1':id==='fresnel'?'0.8':'0.7')+'"></label>\n    <label><span class="cap">Brightness <output data-out="--'+id+'-brightness"></output></span><input data-var="--'+id+'-brightness" type="range" min="0.2" max="3" step="0.01" value="1"></label>\n    <label><span class="cap">Contrast <output data-out="--'+id+'-contrast"></output></span><input data-var="--'+id+'-contrast" type="range" min="0.2" max="3" step="0.01" value="1"></label>\n    <label><span class="cap">Saturate <output data-out="--'+id+'-saturate"></output></span><input data-var="--'+id+'-saturate" type="range" min="0" max="4" step="0.01" value="1"></label>\n    <label><span class="cap">Hue <output data-out="--'+id+'-hue"></output></span><input data-var="--'+id+'-hue" type="range" min="0" max="360" step="1" value="0"></label>\n    <label><span class="cap">Blur <output data-out="--'+id+'-blur"></output></span><input data-var="--'+id+'-blur" type="range" min="0" max="6" step="0.1" value="0"></label>\n  ';
+  filterHost.appendChild(block);
+}
+for(const el of document.querySelectorAll('[data-var]')){
+  if(el.dataset.bound) continue;
+  el.dataset.bound='1';
+  const key=el.dataset.var;
+  const apply=()=>{ setVar(key,el.value); setOut(key,el.value); };
+  el.addEventListener('input',apply,{passive:true});
+  apply();
+}
+</script>
 </body>
 </html>
