@@ -3,81 +3,46 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Metal Border Generator PRO - Layered</title>
+  <title>Metal Border Generator PRO - 3 Band Metal Lines</title>
   <style>
     :root {
-      --border-size: 18;
-      --radius: 34;
-      --base-angle: 24;
+      --border-size: 20;
+      --radius: 38;
+      --base-angle: 28;
       --scroll-progress: 0;
       --scroll-drive: 1;
-      --light-elevation: 0.72;
-      --light-intensity: 1.2;
+      --light-elevation: 0.76;
+      --light-intensity: 1.25;
 
-      --base-gradient-type: 0;
-      --base-interp: 1.1;
-      --c1-r: 236; --c1-g: 240; --c1-b: 248; --c1-a: 0.95;
-      --c2-r: 154; --c2-g: 165; --c2-b: 184; --c2-a: 0.90;
-      --c3-r: 70;  --c3-g: 80;  --c3-b: 98;  --c3-a: 0.88;
-      --c4-r: 248; --c4-g: 252; --c4-b: 255; --c4-a: 0.55;
+      --o-enable: 1; --o-width: 5.5; --o-offset: 0;
+      --s-enable: 1; --s-width: 10;  --s-offset: 0;
+      --i-enable: 1; --i-width: 5.5; --i-offset: 0;
 
-      --bevel-outer-strength: 0.95;
-      --bevel-inner-strength: 0.85;
-      --bevel-width: 6;
-      --bevel-softness: 0.6;
-      --bevel-outer-offset: 0;
-      --bevel-inner-offset: 0;
-      --bevel-gradient-type: 0;
-      --bevel-outer-r: 255; --bevel-outer-g: 255; --bevel-outer-b: 255; --bevel-outer-a: 0.95;
-      --bevel-inner-r: 0; --bevel-inner-g: 0; --bevel-inner-b: 0; --bevel-inner-a: 0.88;
-
-      --fresnel-strength: 0.5;
-      --fresnel-width: 0.3;
-      --fresnel-power: 3.2;
-      --fresnel-r: 210; --fresnel-g: 238; --fresnel-b: 255; --fresnel-a: 0.9;
-
-      --texture-type: 1;
-      --texture-scale: 1.1;
-      --texture-strength: 0.35;
-      --texture-roughness: 0.3;
-      --texture-r: 255; --texture-g: 255; --texture-b: 255; --texture-a: 0.75;
-
-      --arms-count: 10;
-      --arms-width: 0.32;
-      --arms-contrast: 0.52;
-      --arms-spin: 1.2;
-
-      --outer-shadow-x: 0;
-      --outer-shadow-y: 12;
-      --outer-shadow-blur: 28;
-      --outer-shadow-r: 0; --outer-shadow-g: 0; --outer-shadow-b: 0; --outer-shadow-a: 0.35;
-
-      --base-blend: normal;    --base-opacity: 1;    --base-brightness: 1; --base-contrast: 1; --base-saturate: 1.1; --base-hue: 0; --base-blur: 0;
-      --bevel-blend: screen;   --bevel-opacity: 1;   --bevel-brightness: 1; --bevel-contrast: 1; --bevel-saturate: 1; --bevel-hue: 0; --bevel-blur: 0;
-      --fresnel-blend: screen; --fresnel-opacity: .8;--fresnel-brightness: 1; --fresnel-contrast: 1; --fresnel-saturate: 1.2; --fresnel-hue: 0; --fresnel-blur: 0;
-      --texture-blend: overlay;--texture-opacity: .7;--texture-brightness: 1; --texture-contrast: 1; --texture-saturate: 1; --texture-hue: 0; --texture-blur: 0;
+      --outer-shadow-x: 0; --outer-shadow-y: 10; --outer-shadow-blur: 24;
+      --outer-shadow-r: 0; --outer-shadow-g: 0; --outer-shadow-b: 0; --outer-shadow-a: 0.32;
     }
 
     @property --scroll-progress { syntax: "<number>"; inherits: true; initial-value: 0; }
-
     * { box-sizing: border-box; }
     body {
       margin: 0;
       min-height: 280vh;
       font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      color: #f0f4ff;
-      background: radial-gradient(circle at 10% 10%, #324066 0, #171b2d 42%, #0c0f17 100%);
+      color: #f2f6ff;
+      background: radial-gradient(circle at 12% 9%, #35456f 0, #1a2032 44%, #0c0f18 100%);
     }
-    .layout { display:grid; grid-template-columns:minmax(320px,430px) 1fr; gap:1rem; padding:1rem; align-items:start; }
+
+    .layout { display:grid; grid-template-columns:minmax(330px,440px) 1fr; gap:1rem; padding:1rem; align-items:start; }
     .panel {
-      position: sticky; top:.5rem; max-height:calc(100vh - 1rem); overflow:auto; padding:.9rem;
-      border-radius:16px; background:rgba(16,20,32,.86); border:1px solid rgba(255,255,255,.14); backdrop-filter: blur(10px);
+      position: sticky; top:.5rem; max-height: calc(100vh - 1rem); overflow:auto;
+      padding:.9rem; border-radius:16px; border:1px solid rgba(255,255,255,.14);
+      background: rgba(16,20,32,.86); backdrop-filter: blur(10px);
     }
     h2 { margin:.1rem 0 .45rem; font-size:1.08rem; }
-    .panel p { margin:0 0 .7rem; font-size:.82rem; opacity:.84; }
-    .section { border-top:1px solid rgba(255,255,255,.12); padding-top:.7rem; margin-top:.7rem; }
-    .section h3 { margin:0 0 .45rem; font-size:.86rem; }
-    label { display:block; margin:.35rem 0; font-size:.77rem; }
+    .panel p { margin:0 0 .7rem; font-size:.82rem; opacity:.86; }
+    .sec { border-top:1px solid rgba(255,255,255,.12); margin-top:.7rem; padding-top:.7rem; }
+    .sec h3 { margin:0 0 .45rem; font-size:.87rem; }
+    label { display:block; margin:.34rem 0; font-size:.77rem; }
     .cap { display:flex; justify-content:space-between; gap:.4rem; margin-bottom:.1rem; }
     input[type="range"], select, input[type="color"] { width:100%; }
     input[type="color"] { height:36px; border:none; border-radius:8px; background:transparent; }
@@ -86,45 +51,39 @@
     .stage { min-height:96vh; display:grid; place-items:center; padding:1rem; }
     .frame {
       position: relative;
-      width:min(92vw,880px);
-      min-height:min(64vh,560px);
+      width:min(92vw,900px);
+      min-height:min(66vh,580px);
       border-radius: calc(var(--radius) * 1px);
-      overflow: hidden; /* keep all filters inside border box */
+      overflow: hidden;
       isolation: isolate;
       background: transparent;
     }
 
-    .border-part {
+    .line-layer {
       position:absolute; inset:0; border-radius:inherit; pointer-events:none;
-      background: paint(metal-border-part);
+      background: paint(metal-band);
     }
 
-    .part-base {
-      mix-blend-mode: var(--base-blend);
-      opacity: var(--base-opacity);
-      filter: brightness(var(--base-brightness)) contrast(var(--base-contrast)) saturate(var(--base-saturate)) hue-rotate(calc(var(--base-hue)*1deg)) blur(calc(var(--base-blur)*1px));
-      --part-id: 0;
+    .line-outer {
+      --band-id: 0;
+      mix-blend-mode: var(--o-blend, screen);
+      opacity: var(--o-opacity, 1);
+      filter: brightness(var(--o-brightness,1)) contrast(var(--o-contrast,1.05)) saturate(var(--o-saturate,1.1)) hue-rotate(calc(var(--o-hue,0)*1deg)) blur(calc(var(--o-blur,0)*1px));
     }
-    .part-bevel {
-      mix-blend-mode: var(--bevel-blend);
-      opacity: var(--bevel-opacity);
-      filter: brightness(var(--bevel-brightness)) contrast(var(--bevel-contrast)) saturate(var(--bevel-saturate)) hue-rotate(calc(var(--bevel-hue)*1deg)) blur(calc(var(--bevel-blur)*1px));
-      --part-id: 1;
+    .line-surface {
+      --band-id: 1;
+      mix-blend-mode: var(--s-blend, normal);
+      opacity: var(--s-opacity, 1);
+      filter: brightness(var(--s-brightness,1)) contrast(var(--s-contrast,1.08)) saturate(var(--s-saturate,1.08)) hue-rotate(calc(var(--s-hue,0)*1deg)) blur(calc(var(--s-blur,0)*1px));
     }
-    .part-fresnel {
-      mix-blend-mode: var(--fresnel-blend);
-      opacity: var(--fresnel-opacity);
-      filter: brightness(var(--fresnel-brightness)) contrast(var(--fresnel-contrast)) saturate(var(--fresnel-saturate)) hue-rotate(calc(var(--fresnel-hue)*1deg)) blur(calc(var(--fresnel-blur)*1px));
-      --part-id: 2;
-    }
-    .part-texture {
-      mix-blend-mode: var(--texture-blend);
-      opacity: var(--texture-opacity);
-      filter: brightness(var(--texture-brightness)) contrast(var(--texture-contrast)) saturate(var(--texture-saturate)) hue-rotate(calc(var(--texture-hue)*1deg)) blur(calc(var(--texture-blur)*1px));
-      --part-id: 3;
+    .line-inner {
+      --band-id: 2;
+      mix-blend-mode: var(--i-blend, multiply);
+      opacity: var(--i-opacity, 1);
+      filter: brightness(var(--i-brightness,1)) contrast(var(--i-contrast,1.1)) saturate(var(--i-saturate,1.0)) hue-rotate(calc(var(--i-hue,0)*1deg)) blur(calc(var(--i-blur,0)*1px));
     }
 
-    .shadow-layer {
+    .shadow {
       position:absolute; inset:0; border-radius:inherit; pointer-events:none;
       box-shadow: calc(var(--outer-shadow-x)*1px) calc(var(--outer-shadow-y)*1px) calc(var(--outer-shadow-blur)*1px) rgba(var(--outer-shadow-r),var(--outer-shadow-g),var(--outer-shadow-b),var(--outer-shadow-a));
     }
@@ -143,268 +102,179 @@
 </head>
 <body>
   <div class="layout">
-    <aside class="panel">
+    <aside class="panel" id="panel">
       <h2>Metal Border Generator PRO</h2>
-      <p>Every effect is a separate border part. Bevel edges have explicit edge offsets. No center text/no inner content layer.</p>
+      <p>Three physical metal lines: <b>outer bevel</b>, <b>surface</b>, <b>inner bevel</b>. Each line has independent material, fresnel, texture, blending, and filters.</p>
 
-      <div class="section">
+      <div class="sec" id="global-sec">
         <h3>Global Geometry + Light</h3>
-        <label><span class="cap">Border size <output data-out="--border-size"></output></span><input data-var="--border-size" type="range" min="0" max="96" step="0.1" value="18"></label>
-        <label><span class="cap">Radius <output data-out="--radius"></output></span><input data-var="--radius" type="range" min="0" max="120" step="1" value="34"></label>
-        <label><span class="cap">Base angle <output data-out="--base-angle"></output></span><input data-var="--base-angle" type="range" min="0" max="360" step="1" value="24"></label>
+        <label><span class="cap">Border size <output data-out="--border-size"></output></span><input data-var="--border-size" type="range" min="0" max="120" step="0.1" value="20"></label>
+        <label><span class="cap">Radius <output data-out="--radius"></output></span><input data-var="--radius" type="range" min="0" max="140" step="1" value="38"></label>
+        <label><span class="cap">Base angle <output data-out="--base-angle"></output></span><input data-var="--base-angle" type="range" min="0" max="360" step="1" value="28"></label>
         <label><span class="cap">Scroll drive <output data-out="--scroll-drive"></output></span><input data-var="--scroll-drive" type="range" min="0" max="6" step="0.01" value="1"></label>
-        <label><span class="cap">Light elevation <output data-out="--light-elevation"></output></span><input data-var="--light-elevation" type="range" min="0" max="1" step="0.01" value="0.72"></label>
-        <label><span class="cap">Light intensity <output data-out="--light-intensity"></output></span><input data-var="--light-intensity" type="range" min="0" max="3" step="0.01" value="1.2"></label>
+        <label><span class="cap">Light elevation <output data-out="--light-elevation"></output></span><input data-var="--light-elevation" type="range" min="0" max="1" step="0.01" value="0.76"></label>
+        <label><span class="cap">Light intensity <output data-out="--light-intensity"></output></span><input data-var="--light-intensity" type="range" min="0" max="3" step="0.01" value="1.25"></label>
       </div>
 
-      <div class="section">
-        <h3>Part: Base Material (gradient/interpolation)</h3>
-        <label><span class="cap">Gradient type</span><select data-var="--base-gradient-type"><option value="0">Conic</option><option value="1">Linear</option><option value="2">Radial</option></select></label>
-        <label><span class="cap">Interpolation power <output data-out="--base-interp"></output></span><input data-var="--base-interp" type="range" min="0.2" max="3" step="0.01" value="1.1"></label>
-        <label><span class="cap">Conic arms <output data-out="--arms-count"></output></span><input data-var="--arms-count" type="range" min="1" max="40" step="1" value="10"></label>
-        <label><span class="cap">Arms width <output data-out="--arms-width"></output></span><input data-var="--arms-width" type="range" min="0.01" max="0.99" step="0.01" value="0.32"></label>
-        <label><span class="cap">Arms contrast <output data-out="--arms-contrast"></output></span><input data-var="--arms-contrast" type="range" min="0" max="1" step="0.01" value="0.52"></label>
-        <label><span class="cap">Arms spin <output data-out="--arms-spin"></output></span><input data-var="--arms-spin" type="range" min="0" max="6" step="0.01" value="1.2"></label>
-        <div id="base-colors"></div>
-      </div>
-
-      <div class="section">
-        <h3>Part: Bevel (on border edges + offset control)</h3>
-        <label><span class="cap">Bevel gradient type</span><select data-var="--bevel-gradient-type"><option value="0">Linear</option><option value="1">Conic</option><option value="2">Radial</option></select></label>
-        <label><span class="cap">Outer strength <output data-out="--bevel-outer-strength"></output></span><input data-var="--bevel-outer-strength" type="range" min="0" max="2" step="0.01" value="0.95"></label>
-        <label><span class="cap">Inner strength <output data-out="--bevel-inner-strength"></output></span><input data-var="--bevel-inner-strength" type="range" min="0" max="2" step="0.01" value="0.85"></label>
-        <label><span class="cap">Bevel width <output data-out="--bevel-width"></output></span><input data-var="--bevel-width" type="range" min="0" max="48" step="0.1" value="6"></label>
-        <label><span class="cap">Softness <output data-out="--bevel-softness"></output></span><input data-var="--bevel-softness" type="range" min="0.05" max="2" step="0.01" value="0.6"></label>
-        <label><span class="cap">Outer edge offset <output data-out="--bevel-outer-offset"></output></span><input data-var="--bevel-outer-offset" type="range" min="-24" max="24" step="0.1" value="0"></label>
-        <label><span class="cap">Inner edge offset <output data-out="--bevel-inner-offset"></output></span><input data-var="--bevel-inner-offset" type="range" min="-24" max="24" step="0.1" value="0"></label>
-        <div class="row2">
-          <label><span class="cap">Outer bevel color</span><input id="bevel-outer-color" type="color" value="#ffffff"></label>
-          <label><span class="cap">Outer alpha <output data-out="--bevel-outer-a"></output></span><input data-var="--bevel-outer-a" type="range" min="0" max="1" step="0.01" value="0.95"></label>
-          <label><span class="cap">Inner bevel color</span><input id="bevel-inner-color" type="color" value="#000000"></label>
-          <label><span class="cap">Inner alpha <output data-out="--bevel-inner-a"></output></span><input data-var="--bevel-inner-a" type="range" min="0" max="1" step="0.01" value="0.88"></label>
-        </div>
-      </div>
-
-      <div class="section">
-        <h3>Part: Fresnel</h3>
-        <label><span class="cap">Strength <output data-out="--fresnel-strength"></output></span><input data-var="--fresnel-strength" type="range" min="0" max="2" step="0.01" value="0.5"></label>
-        <label><span class="cap">Width <output data-out="--fresnel-width"></output></span><input data-var="--fresnel-width" type="range" min="0" max="1" step="0.01" value="0.3"></label>
-        <label><span class="cap">Power <output data-out="--fresnel-power"></output></span><input data-var="--fresnel-power" type="range" min="0.2" max="8" step="0.01" value="3.2"></label>
-        <div class="row2">
-          <label><span class="cap">Fresnel color</span><input id="fresnel-color" type="color" value="#d2eeff"></label>
-          <label><span class="cap">Fresnel alpha <output data-out="--fresnel-a"></output></span><input data-var="--fresnel-a" type="range" min="0" max="1" step="0.01" value="0.9"></label>
-        </div>
-      </div>
-
-      <div class="section">
-        <h3>Part: Texture (metal finishes)</h3>
-        <label><span class="cap">Texture type</span><select data-var="--texture-type"><option value="0">None</option><option value="1">Brushed</option><option value="2">Cast Noise</option><option value="3">Hammered</option><option value="4">Anisotropic Cross</option></select></label>
-        <label><span class="cap">Scale <output data-out="--texture-scale"></output></span><input data-var="--texture-scale" type="range" min="0.1" max="8" step="0.01" value="1.1"></label>
-        <label><span class="cap">Strength <output data-out="--texture-strength"></output></span><input data-var="--texture-strength" type="range" min="0" max="1" step="0.01" value="0.35"></label>
-        <label><span class="cap">Roughness <output data-out="--texture-roughness"></output></span><input data-var="--texture-roughness" type="range" min="0" max="1" step="0.01" value="0.3"></label>
-        <div class="row2">
-          <label><span class="cap">Texture tint</span><input id="texture-color" type="color" value="#ffffff"></label>
-          <label><span class="cap">Texture alpha <output data-out="--texture-a"></output></span><input data-var="--texture-a" type="range" min="0" max="1" step="0.01" value="0.75"></label>
-        </div>
-      </div>
-
-      <div class="section">
-        <h3>Per-Part Mix / Filters</h3>
-        <div id="part-filters"></div>
-      </div>
+      <div id="bands"></div>
     </aside>
 
     <main class="stage">
       <div class="frame">
-        <div class="border-part part-base"></div>
-        <div class="border-part part-bevel"></div>
-        <div class="border-part part-fresnel"></div>
-        <div class="border-part part-texture"></div>
-        <div class="shadow-layer"></div>
+        <div class="line-layer line-surface"></div>
+        <div class="line-layer line-outer"></div>
+        <div class="line-layer line-inner"></div>
+        <div class="shadow"></div>
       </div>
     </main>
   </div>
 
 <script>
 const WORKLET = `
-class MetalBorderPartPainter {
+class MetalBandPainter {
   static get inputProperties() {
-    return [
-      '--part-id','--border-size','--radius',
-      '--base-angle','--scroll-progress','--scroll-drive','--light-elevation','--light-intensity',
-      '--base-gradient-type','--base-interp','--arms-count','--arms-width','--arms-contrast','--arms-spin',
-      '--bevel-outer-strength','--bevel-inner-strength','--bevel-width','--bevel-softness','--bevel-outer-offset','--bevel-inner-offset','--bevel-gradient-type',
-      '--fresnel-strength','--fresnel-width','--fresnel-power',
-      '--texture-type','--texture-scale','--texture-strength','--texture-roughness',
-      '--c1-r','--c1-g','--c1-b','--c1-a','--c2-r','--c2-g','--c2-b','--c2-a','--c3-r','--c3-g','--c3-b','--c3-a','--c4-r','--c4-g','--c4-b','--c4-a',
-      '--bevel-outer-r','--bevel-outer-g','--bevel-outer-b','--bevel-outer-a','--bevel-inner-r','--bevel-inner-g','--bevel-inner-b','--bevel-inner-a',
-      '--fresnel-r','--fresnel-g','--fresnel-b','--fresnel-a',
-      '--texture-r','--texture-g','--texture-b','--texture-a'
+    const props = [
+      '--band-id','--border-size','--radius','--base-angle','--scroll-progress','--scroll-drive','--light-elevation','--light-intensity'
     ];
+    const ids=['o','s','i'];
+    for (const id of ids) {
+      props.push(
+        '--'+id+'-enable','--'+id+'-width','--'+id+'-offset',
+        '--'+id+'-grad-type','--'+id+'-interp','--'+id+'-arms-count','--'+id+'-arms-width','--'+id+'-arms-contrast','--'+id+'-arms-spin',
+        '--'+id+'-fresnel-strength','--'+id+'-fresnel-width','--'+id+'-fresnel-power',
+        '--'+id+'-texture-type','--'+id+'-texture-scale','--'+id+'-texture-strength','--'+id+'-texture-roughness',
+        '--'+id+'-c1-r','--'+id+'-c1-g','--'+id+'-c1-b','--'+id+'-c1-a',
+        '--'+id+'-c2-r','--'+id+'-c2-g','--'+id+'-c2-b','--'+id+'-c2-a',
+        '--'+id+'-c3-r','--'+id+'-c3-g','--'+id+'-c3-b','--'+id+'-c3-a',
+        '--'+id+'-c4-r','--'+id+'-c4-g','--'+id+'-c4-b','--'+id+'-c4-a',
+        '--'+id+'-fresnel-r','--'+id+'-fresnel-g','--'+id+'-fresnel-b','--'+id+'-fresnel-a',
+        '--'+id+'-tex-r','--'+id+'-tex-g','--'+id+'-tex-b','--'+id+'-tex-a'
+      );
+    }
+    return props;
   }
   p(props,n,d=0){ const v=parseFloat((props.get(n)||'').toString()); return Number.isFinite(v)?v:d; }
-  rgba(props,prefix){ return [this.p(props,prefix+'-r',255),this.p(props,prefix+'-g',255),this.p(props,prefix+'-b',255),this.p(props,prefix+'-a',1)]; }
+  c(props,pfx,n){ return [this.p(props,'--'+pfx+'-'+n+'-r',255),this.p(props,'--'+pfx+'-'+n+'-g',255),this.p(props,'--'+pfx+'-'+n+'-b',255),this.p(props,'--'+pfx+'-'+n+'-a',1)]; }
   hash(x,y){ return (Math.sin(x*127.1+y*311.7)*43758.5453)%1; }
 
-  strokeRoundRect(ctx, inset, w, h, radius, lineWidth) {
-    if (lineWidth <= 0 || w <= inset*2 || h <= inset*2) return;
-    ctx.lineWidth = lineWidth;
+  grad(ctx, type, angle, cx, cy, w, h, border) {
+    if (type===1) return ctx.createLinearGradient(cx-Math.cos(angle)*cx, cy-Math.sin(angle)*cy, cx+Math.cos(angle)*cx, cy+Math.sin(angle)*cy);
+    if (type===2) return ctx.createRadialGradient(cx,cy,border*0.2,cx,cy,Math.max(w,h)*0.55);
+    return ctx.createConicGradient(angle,cx,cy);
+  }
+
+  bandCenter(border, width, offset, bandId) {
+    if (bandId===0) return Math.max(width*0.5, width*0.5 + offset);           // outer bevel center
+    if (bandId===2) return Math.max(width*0.5, border - width*0.5 + offset);  // inner bevel center
+    return Math.max(width*0.5, border*0.5 + offset);                           // surface center
+  }
+
+  strokeBand(ctx, inset, w, h, radius, width) {
+    if (width<=0 || w<=inset*2 || h<=inset*2) return;
+    ctx.lineWidth=width;
     ctx.beginPath();
     ctx.roundRect(inset, inset, Math.max(0,w-inset*2), Math.max(0,h-inset*2), Math.max(0,radius-inset));
     ctx.stroke();
   }
 
   paint(ctx, size, props) {
-    const part = Math.floor(this.p(props,'--part-id',0));
+    const bandId = Math.floor(this.p(props,'--band-id',0));
+    const pfx = ['o','s','i'][Math.max(0,Math.min(2,bandId))];
+
     const w=size.width, h=size.height;
-    const border=Math.max(0, this.p(props,'--border-size',14));
-    if (border <= 0.01) return;
-    const radius=Math.max(0, this.p(props,'--radius',24));
+    const border=Math.max(0,this.p(props,'--border-size',20));
+    if(border<=0.01) return;
+    const radius=Math.max(0,this.p(props,'--radius',34));
+    const enabled=this.p(props,'--'+pfx+'-enable',1);
+    if(enabled<0.5) return;
+
+    const width=Math.max(0,this.p(props,'--'+pfx+'-width',6));
+    if(width<=0.01) return;
+    const offset=this.p(props,'--'+pfx+'-offset',0);
 
     const base=this.p(props,'--base-angle',0), prog=this.p(props,'--scroll-progress',0), drive=this.p(props,'--scroll-drive',1);
     const angle=((base + prog*360*drive)%360)*(Math.PI/180);
-    const elev=this.p(props,'--light-elevation',0.72), inten=this.p(props,'--light-intensity',1.2);
-
-    const midInset=border*0.5;
+    const elev=this.p(props,'--light-elevation',0.75), inten=this.p(props,'--light-intensity',1.2);
     const cx=w*0.5, cy=h*0.5;
 
-    if (part===0) {
-      const c1=this.rgba(props,'--c1'), c2=this.rgba(props,'--c2'), c3=this.rgba(props,'--c3'), c4=this.rgba(props,'--c4');
-      const gType=Math.floor(this.p(props,'--base-gradient-type',0));
-      const interp=this.p(props,'--base-interp',1.1);
-      let grad;
-      if (gType===1) {
-        grad=ctx.createLinearGradient(cx-Math.cos(angle)*cx, cy-Math.sin(angle)*cy, cx+Math.cos(angle)*cx, cy+Math.sin(angle)*cy);
-      } else if (gType===2) {
-        grad=ctx.createRadialGradient(cx,cy,border*0.25,cx,cy,Math.max(w,h)*0.6);
-      } else {
-        grad=ctx.createConicGradient(angle,cx,cy);
-      }
-      const p2=Math.pow(0.25,interp), p3=Math.pow(0.62,interp);
-      grad.addColorStop(0,'rgba('+c1[0]+','+c1[1]+','+c1[2]+','+c1[3]+')');
-      grad.addColorStop(Math.min(1,p2),'rgba('+c2[0]+','+c2[1]+','+c2[2]+','+c2[3]+')');
-      grad.addColorStop(Math.min(1,p3),'rgba('+c3[0]+','+c3[1]+','+c3[2]+','+c3[3]+')');
-      grad.addColorStop(1,'rgba('+c4[0]+','+c4[1]+','+c4[2]+','+c4[3]+')');
+    const c1=this.c(props,pfx,'c1'), c2=this.c(props,pfx,'c2'), c3=this.c(props,pfx,'c3'), c4=this.c(props,pfx,'c4');
+    const gType=Math.floor(this.p(props,'--'+pfx+'-grad-type',0));
+    const interp=Math.max(0.2,this.p(props,'--'+pfx+'-interp',1));
 
-      ctx.strokeStyle=grad;
-      this.strokeRoundRect(ctx, midInset, w, h, radius, border);
+    const center=this.bandCenter(border,width,offset,bandId);
 
-      const arms=Math.max(1,Math.floor(this.p(props,'--arms-count',10)));
-      const aw=Math.max(0.01,Math.min(0.99,this.p(props,'--arms-width',0.32)));
-      const ac=this.p(props,'--arms-contrast',0.52);
-      const spin=this.p(props,'--arms-spin',1.2);
-      const arm=ctx.createConicGradient(angle*spin,cx,cy);
-      for(let i=0;i<arms;i++){
-        const s=i/arms,m=(i+aw*0.5)/arms,e=(i+aw)/arms;
-        arm.addColorStop(s%1,'rgba(255,255,255,0)');
-        arm.addColorStop(m%1,'rgba(255,255,255,'+(0.3*ac)+')');
-        arm.addColorStop(e%1,'rgba(0,0,0,'+(0.16*ac)+')');
-      }
-      ctx.globalCompositeOperation='overlay';
-      ctx.strokeStyle=arm;
-      this.strokeRoundRect(ctx, midInset, w, h, radius, border);
-      ctx.globalCompositeOperation='source-over';
-      return;
+    const g=this.grad(ctx,gType,angle,cx,cy,w,h,border);
+    g.addColorStop(0,'rgba('+c1[0]+','+c1[1]+','+c1[2]+','+c1[3]+')');
+    g.addColorStop(Math.min(1,Math.pow(0.26,interp)),'rgba('+c2[0]+','+c2[1]+','+c2[2]+','+c2[3]+')');
+    g.addColorStop(Math.min(1,Math.pow(0.64,interp)),'rgba('+c3[0]+','+c3[1]+','+c3[2]+','+c3[3]+')');
+    g.addColorStop(1,'rgba('+c4[0]+','+c4[1]+','+c4[2]+','+c4[3]+')');
+
+    ctx.strokeStyle=g;
+    this.strokeBand(ctx,center,w,h,radius,width);
+
+    // directional arms inside each line
+    const arms=Math.max(1,Math.floor(this.p(props,'--'+pfx+'-arms-count',8)));
+    const aw=Math.max(0.01,Math.min(0.99,this.p(props,'--'+pfx+'-arms-width',0.3)));
+    const ac=this.p(props,'--'+pfx+'-arms-contrast',0.5);
+    const spin=this.p(props,'--'+pfx+'-arms-spin',1.2);
+    const arm=ctx.createConicGradient(angle*spin,cx,cy);
+    for(let i=0;i<arms;i++){
+      const s=i/arms,m=(i+aw*0.5)/arms,e=(i+aw)/arms;
+      arm.addColorStop(s%1,'rgba(255,255,255,0)');
+      arm.addColorStop(m%1,'rgba(255,255,255,'+(0.32*ac)+')');
+      arm.addColorStop(e%1,'rgba(0,0,0,'+(0.15*ac)+')');
     }
+    ctx.globalCompositeOperation='overlay';
+    ctx.strokeStyle=arm;
+    this.strokeBand(ctx,center,w,h,radius,width);
+    ctx.globalCompositeOperation='source-over';
 
-    if (part===1) {
-      const bo=this.p(props,'--bevel-outer-strength',0.95);
-      const bi=this.p(props,'--bevel-inner-strength',0.85);
-      const bw=Math.max(0.2,this.p(props,'--bevel-width',6));
-      const bs=Math.max(0.05,this.p(props,'--bevel-softness',0.6));
-      const oOff=this.p(props,'--bevel-outer-offset',0);
-      const iOff=this.p(props,'--bevel-inner-offset',0);
-      const gt=Math.floor(this.p(props,'--bevel-gradient-type',0));
-      const oc=this.rgba(props,'--bevel-outer');
-      const ic=this.rgba(props,'--bevel-inner');
-
-      const gx0=cx-Math.cos(angle)*cx, gy0=cy-Math.sin(angle)*cy, gx1=cx+Math.cos(angle)*cx, gy1=cy+Math.sin(angle)*cy;
-      const makeGrad = (isOuter) => {
-        if (gt===1) return ctx.createConicGradient(angle,cx,cy);
-        if (gt===2) return ctx.createRadialGradient(cx,cy,border*0.2,cx,cy,Math.max(w,h)*0.55);
-        return ctx.createLinearGradient(gx0,gy0,gx1,gy1);
-      };
-      const gOuter=makeGrad(true), gInner=makeGrad(false);
-      gOuter.addColorStop(0,'rgba('+oc[0]+','+oc[1]+','+oc[2]+',0)');
-      gOuter.addColorStop(1,'rgba('+oc[0]+','+oc[1]+','+oc[2]+','+(oc[3]*bo*inten*(0.6+elev*0.4))+')');
-      gInner.addColorStop(0,'rgba('+ic[0]+','+ic[1]+','+ic[2]+','+(ic[3]*bi)+')');
-      gInner.addColorStop(1,'rgba('+ic[0]+','+ic[1]+','+ic[2]+',0)');
-
-      const steps=Math.max(1,Math.floor(Math.min(10,bw)));
-      for(let i=0;i<steps;i++){
-        const t=i/Math.max(1,steps-1);
-        const fall=Math.pow(1-t,1.15/bs);
-
-        const ow=Math.max(0.4, bw/steps);
-        const outerInset=Math.max(0.1, ow*0.5 + i*ow + oOff);
-        ctx.strokeStyle=gOuter;
-        ctx.globalAlpha=fall;
-        this.strokeRoundRect(ctx, outerInset, w, h, radius, ow);
-
-        const iw=Math.max(0.4, bw/steps);
-        const innerInset=Math.max(0.1, border - (iw*0.5 + i*iw) + iOff);
-        ctx.strokeStyle=gInner;
-        ctx.globalAlpha=fall;
-        this.strokeRoundRect(ctx, innerInset, w, h, radius, iw);
-      }
-      ctx.globalAlpha=1;
-      return;
-    }
-
-    if (part===2) {
-      const fs=this.p(props,'--fresnel-strength',0.5);
-      if (fs<=0) return;
-      const fw=this.p(props,'--fresnel-width',0.3);
-      const fp=Math.max(0.2,this.p(props,'--fresnel-power',3.2));
-      const fc=this.rgba(props,'--fresnel');
-
-      const steps=Math.max(10,Math.floor(border*2));
+    // Fresnel on the same line
+    const frS=this.p(props,'--'+pfx+'-fresnel-strength',0.4);
+    const frW=this.p(props,'--'+pfx+'-fresnel-width',0.35);
+    const frP=Math.max(0.2,this.p(props,'--'+pfx+'-fresnel-power',3));
+    const frc=this.c(props,pfx,'fresnel');
+    if(frS>0){
+      const steps=Math.max(8,Math.floor(width*2));
       for(let i=0;i<steps;i++){
         const t=i/steps;
         const edge=Math.abs((t-0.5)/0.5);
-        const fres=Math.pow(1-edge,fp)*fs;
-        const alpha=fres*Math.max(0,1-Math.abs(t-fw));
-        if(alpha<=0.0005) continue;
-        ctx.strokeStyle='rgba('+fc[0]+','+fc[1]+','+fc[2]+','+(fc[3]*alpha)+')';
-        const inset=t*border;
-        this.strokeRoundRect(ctx,inset+0.4,w,h,radius,Math.max(0.5,border/steps+0.25));
+        const fres=Math.pow(1-edge,frP) * frS * (0.5 + elev*0.7) * inten;
+        const a=fres*Math.max(0,1-Math.abs(t-frW));
+        if(a<=0.0007) continue;
+        ctx.strokeStyle='rgba('+frc[0]+','+frc[1]+','+frc[2]+','+(frc[3]*a)+')';
+        this.strokeBand(ctx, center - width*0.5 + t*width, w, h, radius, Math.max(0.45,width/steps+0.2));
       }
-      return;
     }
 
-    if (part===3) {
-      const tt=Math.floor(this.p(props,'--texture-type',1));
-      if (tt===0) return;
-      const ts=Math.max(0.1,this.p(props,'--texture-scale',1.1));
-      const ta=this.p(props,'--texture-strength',0.35);
-      const tr=this.p(props,'--texture-roughness',0.3);
-      const tc=this.rgba(props,'--texture');
-      const perim=Math.max(1,2*((w-border)+(h-border)));
-      const count=Math.min(1200,Math.floor(perim*(0.10+ts*0.08)));
+    // Texture per line
+    const tt=Math.floor(this.p(props,'--'+pfx+'-texture-type',1));
+    if(tt!==0){
+      const ts=Math.max(0.1,this.p(props,'--'+pfx+'-texture-scale',1));
+      const ta=this.p(props,'--'+pfx+'-texture-strength',0.35);
+      const tr=this.p(props,'--'+pfx+'-texture-roughness',0.3);
+      const tc=this.c(props,pfx,'tex');
+      const rw=Math.max(1,w-center*2), rh=Math.max(1,h-center*2);
+      const perim=Math.max(1,2*(rw+rh));
+      const cnt=Math.min(1200,Math.floor(perim*(0.11+ts*0.08)));
       ctx.strokeStyle='rgba('+tc[0]+','+tc[1]+','+tc[2]+','+(tc[3]*ta*0.28)+')';
       ctx.fillStyle='rgba('+tc[0]+','+tc[1]+','+tc[2]+','+(tc[3]*ta*0.24)+')';
-      for(let i=0;i<count;i++){
-        const u=i/count;
-        const side=Math.floor(u*4), t=(u*4)-side;
+      for(let i=0;i<cnt;i++){
+        const u=i/cnt; const side=Math.floor(u*4), t=(u*4)-side;
         let x=0,y=0;
-        const mi=midInset;
-        const rw=Math.max(1,w-mi*2), rh=Math.max(1,h-mi*2);
-        if(side===0){x=mi+rw*t;y=mi;} else if(side===1){x=mi+rw;y=mi+rh*t;} else if(side===2){x=mi+rw*(1-t);y=mi+rh;} else {x=mi;y=mi+rh*(1-t);}        
-        const nx=(this.hash(i,13.1)-0.5)*border*0.5;
-        const ny=(this.hash(i,27.7)-0.5)*border*0.5;
-        if(tt===1){ // brushed
-          const len=1.5 + this.hash(i,55.1)*border*0.35;
-          ctx.beginPath();
-          ctx.moveTo(x+nx,y+ny);
-          ctx.lineTo(x+nx+Math.cos(angle)*len,y+ny+Math.sin(angle)*len);
-          ctx.stroke();
-        } else if(tt===2){ // cast noise
-          const r=0.35 + this.hash(i,41.3)*1.3*tr;
+        if(side===0){x=center+rw*t;y=center;} else if(side===1){x=center+rw;y=center+rh*t;} else if(side===2){x=center+rw*(1-t);y=center+rh;} else {x=center;y=center+rh*(1-t);}        
+        const nx=(this.hash(i,13.1)-0.5)*width*0.6;
+        const ny=(this.hash(i,27.7)-0.5)*width*0.6;
+        if(tt===1){
+          const len=1.2 + this.hash(i,55.1)*width*0.4;
+          ctx.beginPath(); ctx.moveTo(x+nx,y+ny); ctx.lineTo(x+nx+Math.cos(angle)*len,y+ny+Math.sin(angle)*len); ctx.stroke();
+        } else if(tt===2){
+          const r=0.3 + this.hash(i,41.3)*1.3*tr;
           ctx.beginPath(); ctx.arc(x+nx,y+ny,r,0,Math.PI*2); ctx.fill();
-        } else if(tt===3){ // hammered
+        } else if(tt===3){
           const r=0.45 + this.hash(i,71.9)*2.1*tr;
           ctx.beginPath(); ctx.arc(x+nx,y+ny,r,0,Math.PI*2); ctx.stroke();
-        } else { // anisotropic cross
+        } else {
           const l=1 + this.hash(i,62.2)*2.4;
           ctx.beginPath(); ctx.moveTo(x+nx-l,y+ny); ctx.lineTo(x+nx+l,y+ny); ctx.moveTo(x+nx,y+ny-l); ctx.lineTo(x+nx,y+ny+l); ctx.stroke();
         }
@@ -412,28 +282,75 @@ class MetalBorderPartPainter {
     }
   }
 }
-registerPaint('metal-border-part', MetalBorderPartPainter);
+registerPaint('metal-band', MetalBandPainter);
 `;
 
 (async()=>{
-  if (!('paintWorklet' in CSS)) return alert('CSS Paint API not supported in this browser.');
+  if(!('paintWorklet' in CSS)) return alert('CSS Paint API not supported in this browser.');
   const blob=new Blob([WORKLET],{type:'text/javascript'});
   await CSS.paintWorklet.addModule(URL.createObjectURL(blob));
 })();
 
 const root=document.documentElement;
-const controls=document.querySelectorAll('[data-var]');
-const outputs=document.querySelectorAll('[data-out]');
-
 function setVar(k,v){ root.style.setProperty(k,String(v)); }
-function setOut(k,v){ const o=document.querySelector('[data-out="'+k+'"]'); if(o)o.textContent=String(v); }
-controls.forEach(el=>{
+function out(k,v){ const o=document.querySelector('[data-out="'+k+'"]'); if(o) o.textContent=String(v); }
+
+function bindVar(el){
   const key=el.dataset.var;
-  const apply=()=>{ setVar(key,el.value); setOut(key,el.value); };
+  const apply=()=>{ setVar(key,el.value); out(key,el.value); };
   el.addEventListener('input',apply,{passive:true});
   apply();
-});
-outputs.forEach(o=>{ if(!o.textContent) o.textContent=getComputedStyle(root).getPropertyValue(o.dataset.out).trim(); });
+}
+
+function hexToRgb(hex){ const v=parseInt(hex.replace('#',''),16); return {r:(v>>16)&255,g:(v>>8)&255,b:v&255}; }
+function bindColor(input,prefix){
+  const apply=()=>{ const c=hexToRgb(input.value); setVar(prefix+'-r',c.r); setVar(prefix+'-g',c.g); setVar(prefix+'-b',c.b); };
+  input.addEventListener('input',apply,{passive:true});
+  apply();
+}
+
+function createBandUI(prefix, label, defaults){
+  const host=document.createElement('div');
+  host.className='sec';
+  host.innerHTML='\n    <h3>'+label+' (independent metal line)</h3>\n    <label><span class="cap">Enable</span><select data-var="--'+prefix+'-enable"><option value="1">On</option><option value="0">Off</option></select></label>\n    <label><span class="cap">Width <output data-out="--'+prefix+'-width"></output></span><input data-var="--'+prefix+'-width" type="range" min="0" max="40" step="0.1" value="'+defaults.width+'"></label>\n    <label><span class="cap">Edge offset <output data-out="--'+prefix+'-offset"></output></span><input data-var="--'+prefix+'-offset" type="range" min="-30" max="30" step="0.1" value="'+defaults.offset+'"></label>\n\n    <label><span class="cap">Gradient type</span><select data-var="--'+prefix+'-grad-type"><option value="0">Conic</option><option value="1">Linear</option><option value="2">Radial</option></select></label>\n    <label><span class="cap">Interpolation <output data-out="--'+prefix+'-interp"></output></span><input data-var="--'+prefix+'-interp" type="range" min="0.2" max="3" step="0.01" value="'+defaults.interp+'"></label>\n\n    <label><span class="cap">Arms count <output data-out="--'+prefix+'-arms-count"></output></span><input data-var="--'+prefix+'-arms-count" type="range" min="1" max="40" step="1" value="'+defaults.armsCount+'"></label>\n    <label><span class="cap">Arms width <output data-out="--'+prefix+'-arms-width"></output></span><input data-var="--'+prefix+'-arms-width" type="range" min="0.01" max="0.99" step="0.01" value="'+defaults.armsWidth+'"></label>\n    <label><span class="cap">Arms contrast <output data-out="--'+prefix+'-arms-contrast"></output></span><input data-var="--'+prefix+'-arms-contrast" type="range" min="0" max="1" step="0.01" value="'+defaults.armsContrast+'"></label>\n    <label><span class="cap">Arms spin <output data-out="--'+prefix+'-arms-spin"></output></span><input data-var="--'+prefix+'-arms-spin" type="range" min="0" max="6" step="0.01" value="'+defaults.armsSpin+'"></label>\n\n    <div class="row2" data-colors></div>\n\n    <label><span class="cap">Fresnel strength <output data-out="--'+prefix+'-fresnel-strength"></output></span><input data-var="--'+prefix+'-fresnel-strength" type="range" min="0" max="2" step="0.01" value="'+defaults.fStrength+'"></label>\n    <label><span class="cap">Fresnel width <output data-out="--'+prefix+'-fresnel-width"></output></span><input data-var="--'+prefix+'-fresnel-width" type="range" min="0" max="1" step="0.01" value="'+defaults.fWidth+'"></label>\n    <label><span class="cap">Fresnel power <output data-out="--'+prefix+'-fresnel-power"></output></span><input data-var="--'+prefix+'-fresnel-power" type="range" min="0.2" max="8" step="0.01" value="'+defaults.fPower+'"></label>\n    <div class="row2">\n      <label><span class="cap">Fresnel color</span><input type="color" data-color="--'+prefix+'-fresnel" value="'+defaults.fColor+'"></label>\n      <label><span class="cap">Fresnel alpha <output data-out="--'+prefix+'-fresnel-a"></output></span><input data-var="--'+prefix+'-fresnel-a" type="range" min="0" max="1" step="0.01" value="'+defaults.fAlpha+'"></label>\n    </div>\n\n    <label><span class="cap">Texture type</span><select data-var="--'+prefix+'-texture-type"><option value="0">None</option><option value="1">Brushed</option><option value="2">Cast</option><option value="3">Hammered</option><option value="4">Anisotropic Cross</option></select></label>\n    <label><span class="cap">Texture scale <output data-out="--'+prefix+'-texture-scale"></output></span><input data-var="--'+prefix+'-texture-scale" type="range" min="0.1" max="8" step="0.01" value="'+defaults.tScale+'"></label>\n    <label><span class="cap">Texture strength <output data-out="--'+prefix+'-texture-strength"></output></span><input data-var="--'+prefix+'-texture-strength" type="range" min="0" max="1" step="0.01" value="'+defaults.tStrength+'"></label>\n    <label><span class="cap">Texture roughness <output data-out="--'+prefix+'-texture-roughness"></output></span><input data-var="--'+prefix+'-texture-roughness" type="range" min="0" max="1" step="0.01" value="'+defaults.tRough+'"></label>\n    <div class="row2">\n      <label><span class="cap">Texture tint</span><input type="color" data-color="--'+prefix+'-tex" value="'+defaults.tColor+'"></label>\n      <label><span class="cap">Texture alpha <output data-out="--'+prefix+'-tex-a"></output></span><input data-var="--'+prefix+'-tex-a" type="range" min="0" max="1" step="0.01" value="'+defaults.tAlpha+'"></label>\n    </div>\n\n    <h3>Mix + Filters ('+label+')</h3>\n    <label><span class="cap">Blend</span><select data-var="--'+prefix+'-blend"><option>normal</option><option>overlay</option><option>screen</option><option>multiply</option><option>soft-light</option><option>hard-light</option><option>color-dodge</option><option>color-burn</option><option>difference</option><option>luminosity</option></select></label>\n    <label><span class="cap">Opacity <output data-out="--'+prefix+'-opacity"></output></span><input data-var="--'+prefix+'-opacity" type="range" min="0" max="1" step="0.01" value="'+defaults.opacity+'"></label>\n    <label><span class="cap">Brightness <output data-out="--'+prefix+'-brightness"></output></span><input data-var="--'+prefix+'-brightness" type="range" min="0.2" max="3" step="0.01" value="'+defaults.brightness+'"></label>\n    <label><span class="cap">Contrast <output data-out="--'+prefix+'-contrast"></output></span><input data-var="--'+prefix+'-contrast" type="range" min="0.2" max="3" step="0.01" value="'+defaults.contrast+'"></label>\n    <label><span class="cap">Saturate <output data-out="--'+prefix+'-saturate"></output></span><input data-var="--'+prefix+'-saturate" type="range" min="0" max="4" step="0.01" value="'+defaults.saturate+'"></label>\n    <label><span class="cap">Hue <output data-out="--'+prefix+'-hue"></output></span><input data-var="--'+prefix+'-hue" type="range" min="0" max="360" step="1" value="'+defaults.hue+'"></label>\n    <label><span class="cap">Blur <output data-out="--'+prefix+'-blur"></output></span><input data-var="--'+prefix+'-blur" type="range" min="0" max="6" step="0.1" value="'+defaults.blur+'"></label>\n  ';
+
+  const colorArea=host.querySelector('[data-colors]');
+  const stops=[['c1',defaults.c1,defaults.a1],['c2',defaults.c2,defaults.a2],['c3',defaults.c3,defaults.a3],['c4',defaults.c4,defaults.a4]];
+  for(const [id,hex,a] of stops){
+    const row=document.createElement('label');
+    row.innerHTML='<span class="cap">'+id.toUpperCase()+' color</span><input type="color" data-color="--'+prefix+'-'+id+'" value="'+hex+'">\n<span class="cap">'+id.toUpperCase()+' alpha <output data-out="--'+prefix+'-'+id+'-a"></output></span><input data-var="--'+prefix+'-'+id+'-a" type="range" min="0" max="1" step="0.01" value="'+a+'">';
+    colorArea.appendChild(row);
+  }
+
+  return host;
+}
+
+const bandsHost=document.getElementById('bands');
+bandsHost.appendChild(createBandUI('o','Outer Bevel',{
+  width:5.5,offset:0,interp:1.2,armsCount:8,armsWidth:.28,armsContrast:.55,armsSpin:1.15,
+  c1:'#ffffff',a1:.95,c2:'#d6dde8',a2:.86,c3:'#8e9bb0',a3:.68,c4:'#f8fcff',a4:.6,
+  fStrength:.55,fWidth:.35,fPower:3.6,fColor:'#ebf6ff',fAlpha:.82,
+  tScale:1.1,tStrength:.24,tRough:.22,tColor:'#ffffff',tAlpha:.65,
+  opacity:1,brightness:1.08,contrast:1.15,saturate:1.05,hue:0,blur:0
+}));
+bandsHost.appendChild(createBandUI('s','Surface',{
+  width:10,offset:0,interp:1.05,armsCount:12,armsWidth:.35,armsContrast:.5,armsSpin:1.22,
+  c1:'#e7ecf5',a1:.94,c2:'#9daabd',a2:.88,c3:'#4f5a6c',a3:.9,c4:'#dbe2ef',a4:.72,
+  fStrength:.36,fWidth:.26,fPower:2.8,fColor:'#cae1ff',fAlpha:.68,
+  tScale:1.3,tStrength:.42,tRough:.33,tColor:'#f7f9ff',tAlpha:.75,
+  opacity:1,brightness:1,contrast:1.08,saturate:1.08,hue:0,blur:0
+}));
+bandsHost.appendChild(createBandUI('i','Inner Bevel',{
+  width:5.5,offset:0,interp:1.25,armsCount:8,armsWidth:.28,armsContrast:.48,armsSpin:1.1,
+  c1:'#8a95ab',a1:.72,c2:'#3f495b',a2:.9,c3:'#131821',a3:.96,c4:'#2b3442',a4:.76,
+  fStrength:.22,fWidth:.2,fPower:4.1,fColor:'#9bc8ff',fAlpha:.5,
+  tScale:1.05,tStrength:.3,tRough:.4,tColor:'#dce4ef',tAlpha:.52,
+  opacity:1,brightness:.95,contrast:1.2,saturate:.95,hue:0,blur:0
+}));
+
+for(const el of document.querySelectorAll('[data-var]')) bindVar(el);
+for(const el of document.querySelectorAll('[data-color]')) bindColor(el, el.dataset.color);
+for(const o of document.querySelectorAll('[data-out]')) if(!o.textContent) o.textContent=getComputedStyle(root).getPropertyValue(o.dataset.out).trim();
 
 const hasScrollTimeline=CSS.supports('animation-timeline: scroll()');
 if(!hasScrollTimeline){
@@ -441,52 +358,6 @@ if(!hasScrollTimeline){
   const tick=()=>{ raf=0; const max=Math.max(1,document.documentElement.scrollHeight-innerHeight); const p=Math.max(0,Math.min(1,scrollY/max)); setVar('--scroll-progress',p.toFixed(6)); };
   addEventListener('scroll',()=>{ if(!raf) raf=requestAnimationFrame(tick); },{passive:true});
   tick();
-}
-
-function hexToRgb(hex){ const v=parseInt(hex.replace('#',''),16); return {r:(v>>16)&255,g:(v>>8)&255,b:v&255}; }
-function bindColor(id,prefix){
-  const el=document.getElementById(id);
-  const fn=()=>{ const c=hexToRgb(el.value); setVar(prefix+'-r',c.r); setVar(prefix+'-g',c.g); setVar(prefix+'-b',c.b); };
-  el.addEventListener('input',fn,{passive:true}); fn();
-}
-bindColor('bevel-outer-color','--bevel-outer');
-bindColor('bevel-inner-color','--bevel-inner');
-bindColor('fresnel-color','--fresnel');
-bindColor('texture-color','--texture');
-
-const colorHost=document.getElementById('base-colors');
-const stops=[['c1','ecf0f8',0.95],['c2','9aa5b8',0.90],['c3','465062',0.88],['c4','f8fcff',0.55]];
-for(let i=0;i<stops.length;i++){
-  const [id,hex,a]=stops[i];
-  const row=document.createElement('div');
-  row.className='row2';
-  row.innerHTML='<label><span class="cap">Stop '+(i+1)+' Color</span><input type="color" data-stop="'+id+'" value="#'+hex+'"></label>'+
-                '<label><span class="cap">Stop '+(i+1)+' Alpha</span><input type="range" data-stop-alpha="'+id+'" min="0" max="1" step="0.01" value="'+a+'"></label>';
-  colorHost.appendChild(row);
-}
-colorHost.addEventListener('input',e=>{
-  const t=e.target;
-  if(t.matches('[data-stop]')){ const id=t.dataset.stop; const c=hexToRgb(t.value); setVar('--'+id+'-r',c.r); setVar('--'+id+'-g',c.g); setVar('--'+id+'-b',c.b); }
-  if(t.matches('[data-stop-alpha]')){ setVar('--'+t.dataset.stopAlpha+'-a', t.value); }
-});
-for(const el of colorHost.querySelectorAll('[data-stop],[data-stop-alpha]')) el.dispatchEvent(new Event('input'));
-
-const filterHost=document.getElementById('part-filters');
-const parts=[['base','Base'],['bevel','Bevel'],['fresnel','Fresnel'],['texture','Texture']];
-const blendOpts=['normal','overlay','screen','multiply','soft-light','hard-light','color-dodge','color-burn','difference','luminosity'];
-for(const [id,title] of parts){
-  const block=document.createElement('div');
-  block.className='section';
-  block.innerHTML='\n    <h3>'+title+' Mix/Filter</h3>\n    <label><span class="cap">Blend</span><select data-var="--'+id+'-blend">'+blendOpts.map(v=>'<option>'+v+'</option>').join('')+'</select></label>\n    <label><span class="cap">Opacity <output data-out="--'+id+'-opacity"></output></span><input data-var="--'+id+'-opacity" type="range" min="0" max="1" step="0.01" value="'+(id==='base'?'1':id==='bevel'?'1':id==='fresnel'?'0.8':'0.7')+'"></label>\n    <label><span class="cap">Brightness <output data-out="--'+id+'-brightness"></output></span><input data-var="--'+id+'-brightness" type="range" min="0.2" max="3" step="0.01" value="1"></label>\n    <label><span class="cap">Contrast <output data-out="--'+id+'-contrast"></output></span><input data-var="--'+id+'-contrast" type="range" min="0.2" max="3" step="0.01" value="1"></label>\n    <label><span class="cap">Saturate <output data-out="--'+id+'-saturate"></output></span><input data-var="--'+id+'-saturate" type="range" min="0" max="4" step="0.01" value="1"></label>\n    <label><span class="cap">Hue <output data-out="--'+id+'-hue"></output></span><input data-var="--'+id+'-hue" type="range" min="0" max="360" step="1" value="0"></label>\n    <label><span class="cap">Blur <output data-out="--'+id+'-blur"></output></span><input data-var="--'+id+'-blur" type="range" min="0" max="6" step="0.1" value="0"></label>\n  ';
-  filterHost.appendChild(block);
-}
-for(const el of document.querySelectorAll('[data-var]')){
-  if(el.dataset.bound) continue;
-  el.dataset.bound='1';
-  const key=el.dataset.var;
-  const apply=()=>{ setVar(key,el.value); setOut(key,el.value); };
-  el.addEventListener('input',apply,{passive:true});
-  apply();
 }
 </script>
 </body>
