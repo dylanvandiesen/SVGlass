@@ -3,117 +3,101 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Metal Border Generator PRO - 3 Band Metal Lines</title>
+  <title>Metal Border Generator PRO - Layered Stops</title>
   <style>
     :root {
-      --border-size: 20;
-      --radius: 38;
+      --border-size: 22;
+      --radius: 40;
       --base-angle: 28;
       --scroll-progress: 0;
       --scroll-drive: 1;
-      --light-elevation: 0.76;
-      --light-intensity: 1.25;
+      --light-elevation: 0.78;
+      --light-intensity: 1.2;
 
+      --m-enable: 1; --m-width: 22; --m-offset: 0;
       --o-enable: 1; --o-width: 5.5; --o-offset: 0;
-      --s-enable: 1; --s-width: 10;  --s-offset: 0;
+      --s-enable: 1; --s-width: 11;  --s-offset: 0;
       --i-enable: 1; --i-width: 5.5; --i-offset: 0;
 
-      --outer-shadow-x: 0; --outer-shadow-y: 10; --outer-shadow-blur: 24;
-      --outer-shadow-r: 0; --outer-shadow-g: 0; --outer-shadow-b: 0; --outer-shadow-a: 0.32;
+      --outer-shadow-x: 0; --outer-shadow-y: 12; --outer-shadow-blur: 28;
+      --outer-shadow-r: 0; --outer-shadow-g: 0; --outer-shadow-b: 0; --outer-shadow-a: 0.30;
+
+      --g1-r: 250; --g1-g: 252; --g1-b: 255; --g1-a: 0.95;
+      --g2-r: 194; --g2-g: 204; --g2-b: 220; --g2-a: 0.88;
+      --g3-r: 134; --g3-g: 146; --g3-b: 166; --g3-a: 0.82;
+      --g4-r: 75;  --g4-g: 86;  --g4-b: 104; --g4-a: 0.9;
+      --g5-r: 38;  --g5-g: 47;  --g5-b: 61;  --g5-a: 0.92;
+      --g6-r: 223; --g6-g: 238; --g6-b: 255; --g6-a: 0.7;
     }
 
     @property --scroll-progress { syntax: "<number>"; inherits: true; initial-value: 0; }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      min-height: 280vh;
-      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      color: #f2f6ff;
-      background: radial-gradient(circle at 12% 9%, #35456f 0, #1a2032 44%, #0c0f18 100%);
+    *{box-sizing:border-box}
+    body{
+      margin:0; min-height:280vh;
+      font-family: Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+      color:#f2f6ff;
+      background: radial-gradient(circle at 12% 10%, #33456f 0, #171d30 43%, #0b0f17 100%);
     }
+    .layout{display:grid;grid-template-columns:minmax(340px,460px) 1fr;gap:1rem;padding:1rem;align-items:start}
+    .panel{position:sticky;top:.5rem;max-height:calc(100vh - 1rem);overflow:auto;padding:.9rem;border-radius:16px;border:1px solid rgba(255,255,255,.14);background:rgba(16,20,33,.86);backdrop-filter:blur(10px)}
+    h2{margin:.1rem 0 .45rem;font-size:1.08rem}
+    .panel p{margin:0 0 .7rem;font-size:.82rem;opacity:.86}
+    .sec{border-top:1px solid rgba(255,255,255,.12);margin-top:.7rem;padding-top:.7rem}
+    .sec h3{margin:0 0 .45rem;font-size:.87rem}
+    label{display:block;margin:.34rem 0;font-size:.77rem}
+    .cap{display:flex;justify-content:space-between;gap:.4rem;margin-bottom:.1rem}
+    input[type="range"],select,input[type="color"]{width:100%}
+    input[type="color"]{height:36px;border:none;border-radius:8px;background:transparent}
+    .row2{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+    .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.45rem}
 
-    .layout { display:grid; grid-template-columns:minmax(330px,440px) 1fr; gap:1rem; padding:1rem; align-items:start; }
-    .panel {
-      position: sticky; top:.5rem; max-height: calc(100vh - 1rem); overflow:auto;
-      padding:.9rem; border-radius:16px; border:1px solid rgba(255,255,255,.14);
-      background: rgba(16,20,32,.86); backdrop-filter: blur(10px);
+    .stage{min-height:96vh;display:grid;place-items:center;padding:1rem}
+    .frame{
+      position:relative;
+      width:min(92vw,920px);
+      min-height:min(66vh,600px);
+      border-radius:calc(var(--radius)*1px);
+      overflow:hidden;
+      isolation:isolate;
+      background:transparent;
     }
-    h2 { margin:.1rem 0 .45rem; font-size:1.08rem; }
-    .panel p { margin:0 0 .7rem; font-size:.82rem; opacity:.86; }
-    .sec { border-top:1px solid rgba(255,255,255,.12); margin-top:.7rem; padding-top:.7rem; }
-    .sec h3 { margin:0 0 .45rem; font-size:.87rem; }
-    label { display:block; margin:.34rem 0; font-size:.77rem; }
-    .cap { display:flex; justify-content:space-between; gap:.4rem; margin-bottom:.1rem; }
-    input[type="range"], select, input[type="color"] { width:100%; }
-    input[type="color"] { height:36px; border:none; border-radius:8px; background:transparent; }
-    .row2 { display:grid; grid-template-columns:1fr 1fr; gap:.5rem; }
+    .line{position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:paint(metal-band)}
+    .line-main{--band-id:0;mix-blend-mode:var(--m-layer-blend,normal);opacity:var(--m-layer-opacity,1);filter:brightness(var(--m-layer-brightness,1)) contrast(var(--m-layer-contrast,1)) saturate(var(--m-layer-saturate,1)) hue-rotate(calc(var(--m-layer-hue,0)*1deg)) blur(calc(var(--m-layer-blur,0)*1px));}
+    .line-outer{--band-id:1;mix-blend-mode:var(--o-layer-blend,screen);opacity:var(--o-layer-opacity,1);filter:brightness(var(--o-layer-brightness,1)) contrast(var(--o-layer-contrast,1.1)) saturate(var(--o-layer-saturate,1.05)) hue-rotate(calc(var(--o-layer-hue,0)*1deg)) blur(calc(var(--o-layer-blur,0)*1px));}
+    .line-surface{--band-id:2;mix-blend-mode:var(--s-layer-blend,normal);opacity:var(--s-layer-opacity,1);filter:brightness(var(--s-layer-brightness,1)) contrast(var(--s-layer-contrast,1.08)) saturate(var(--s-layer-saturate,1.1)) hue-rotate(calc(var(--s-layer-hue,0)*1deg)) blur(calc(var(--s-layer-blur,0)*1px));}
+    .line-inner{--band-id:3;mix-blend-mode:var(--i-layer-blend,multiply);opacity:var(--i-layer-opacity,1);filter:brightness(var(--i-layer-brightness,.97)) contrast(var(--i-layer-contrast,1.2)) saturate(var(--i-layer-saturate,.95)) hue-rotate(calc(var(--i-layer-hue,0)*1deg)) blur(calc(var(--i-layer-blur,0)*1px));}
 
-    .stage { min-height:96vh; display:grid; place-items:center; padding:1rem; }
-    .frame {
-      position: relative;
-      width:min(92vw,900px);
-      min-height:min(66vh,580px);
-      border-radius: calc(var(--radius) * 1px);
-      overflow: hidden;
-      isolation: isolate;
-      background: transparent;
-    }
-
-    .line-layer {
-      position:absolute; inset:0; border-radius:inherit; pointer-events:none;
-      background: paint(metal-band);
-    }
-
-    .line-outer {
-      --band-id: 0;
-      mix-blend-mode: var(--o-blend, screen);
-      opacity: var(--o-opacity, 1);
-      filter: brightness(var(--o-brightness,1)) contrast(var(--o-contrast,1.05)) saturate(var(--o-saturate,1.1)) hue-rotate(calc(var(--o-hue,0)*1deg)) blur(calc(var(--o-blur,0)*1px));
-    }
-    .line-surface {
-      --band-id: 1;
-      mix-blend-mode: var(--s-blend, normal);
-      opacity: var(--s-opacity, 1);
-      filter: brightness(var(--s-brightness,1)) contrast(var(--s-contrast,1.08)) saturate(var(--s-saturate,1.08)) hue-rotate(calc(var(--s-hue,0)*1deg)) blur(calc(var(--s-blur,0)*1px));
-    }
-    .line-inner {
-      --band-id: 2;
-      mix-blend-mode: var(--i-blend, multiply);
-      opacity: var(--i-opacity, 1);
-      filter: brightness(var(--i-brightness,1)) contrast(var(--i-contrast,1.1)) saturate(var(--i-saturate,1.0)) hue-rotate(calc(var(--i-hue,0)*1deg)) blur(calc(var(--i-blur,0)*1px));
-    }
-
-    .shadow {
-      position:absolute; inset:0; border-radius:inherit; pointer-events:none;
-      box-shadow: calc(var(--outer-shadow-x)*1px) calc(var(--outer-shadow-y)*1px) calc(var(--outer-shadow-blur)*1px) rgba(var(--outer-shadow-r),var(--outer-shadow-g),var(--outer-shadow-b),var(--outer-shadow-a));
-    }
+    .shadow{position:absolute;inset:0;border-radius:inherit;pointer-events:none;box-shadow:calc(var(--outer-shadow-x)*1px) calc(var(--outer-shadow-y)*1px) calc(var(--outer-shadow-blur)*1px) rgba(var(--outer-shadow-r),var(--outer-shadow-g),var(--outer-shadow-b),var(--outer-shadow-a));}
 
     @supports (animation-timeline: scroll()) {
-      body { animation: prog linear both; animation-timeline: scroll(root); animation-range: 0% 100%; }
-      @keyframes prog { from { --scroll-progress: 0; } to { --scroll-progress: 1; } }
+      body{animation:prog linear both;animation-timeline:scroll(root);animation-range:0% 100%}
+      @keyframes prog{from{--scroll-progress:0}to{--scroll-progress:1}}
     }
-
-    @media (max-width: 930px) {
-      .layout { grid-template-columns:1fr; }
-      .panel { position:fixed; left:.6rem; right:.6rem; bottom:.6rem; top:auto; max-height:47vh; z-index:20; }
-      .stage { padding-bottom:49vh; }
+    @media (max-width:930px){
+      .layout{grid-template-columns:1fr}
+      .panel{position:fixed;left:.6rem;right:.6rem;bottom:.6rem;top:auto;max-height:48vh;z-index:20}
+      .stage{padding-bottom:50vh}
     }
   </style>
 </head>
 <body>
   <div class="layout">
-    <aside class="panel" id="panel">
+    <aside class="panel">
       <h2>Metal Border Generator PRO</h2>
-      <p>Three physical metal lines: <b>outer bevel</b>, <b>surface</b>, <b>inner bevel</b>. Each line has independent material, fresnel, texture, blending, and filters.</p>
+      <p>Main band + outer bevel + surface + inner bevel. Each has own background/gradient + conic + blend/filter + custom stops from a global palette.</p>
 
-      <div class="sec" id="global-sec">
+      <div class="sec">
         <h3>Global Geometry + Light</h3>
-        <label><span class="cap">Border size <output data-out="--border-size"></output></span><input data-var="--border-size" type="range" min="0" max="120" step="0.1" value="20"></label>
-        <label><span class="cap">Radius <output data-out="--radius"></output></span><input data-var="--radius" type="range" min="0" max="140" step="1" value="38"></label>
+        <label><span class="cap">Border size <output data-out="--border-size"></output></span><input data-var="--border-size" type="range" min="0" max="140" step="0.1" value="22"></label>
+        <label><span class="cap">Radius <output data-out="--radius"></output></span><input data-var="--radius" type="range" min="0" max="160" step="1" value="40"></label>
         <label><span class="cap">Base angle <output data-out="--base-angle"></output></span><input data-var="--base-angle" type="range" min="0" max="360" step="1" value="28"></label>
-        <label><span class="cap">Scroll drive <output data-out="--scroll-drive"></output></span><input data-var="--scroll-drive" type="range" min="0" max="6" step="0.01" value="1"></label>
-        <label><span class="cap">Light elevation <output data-out="--light-elevation"></output></span><input data-var="--light-elevation" type="range" min="0" max="1" step="0.01" value="0.76"></label>
-        <label><span class="cap">Light intensity <output data-out="--light-intensity"></output></span><input data-var="--light-intensity" type="range" min="0" max="3" step="0.01" value="1.25"></label>
+        <label><span class="cap">Scroll drive <output data-out="--scroll-drive"></output></span><input data-var="--scroll-drive" type="range" min="0" max="8" step="0.01" value="1"></label>
+        <label><span class="cap">Light elevation <output data-out="--light-elevation"></output></span><input data-var="--light-elevation" type="range" min="0" max="1" step="0.01" value="0.78"></label>
+        <label><span class="cap">Light intensity <output data-out="--light-intensity"></output></span><input data-var="--light-intensity" type="range" min="0" max="4" step="0.01" value="1.2"></label>
+      </div>
+
+      <div class="sec" id="global-palette">
+        <h3>Global Palette (shared colors + alpha)</h3>
       </div>
 
       <div id="bands"></div>
@@ -121,9 +105,10 @@
 
     <main class="stage">
       <div class="frame">
-        <div class="line-layer line-surface"></div>
-        <div class="line-layer line-outer"></div>
-        <div class="line-layer line-inner"></div>
+        <div class="line line-main"></div>
+        <div class="line line-surface"></div>
+        <div class="line line-outer"></div>
+        <div class="line line-inner"></div>
         <div class="shadow"></div>
       </div>
     </main>
@@ -133,153 +118,178 @@
 const WORKLET = `
 class MetalBandPainter {
   static get inputProperties() {
-    const props = [
-      '--band-id','--border-size','--radius','--base-angle','--scroll-progress','--scroll-drive','--light-elevation','--light-intensity'
-    ];
-    const ids=['o','s','i'];
-    for (const id of ids) {
-      props.push(
-        '--'+id+'-enable','--'+id+'-width','--'+id+'-offset',
-        '--'+id+'-grad-type','--'+id+'-interp','--'+id+'-arms-count','--'+id+'-arms-width','--'+id+'-arms-contrast','--'+id+'-arms-spin',
-        '--'+id+'-fresnel-strength','--'+id+'-fresnel-width','--'+id+'-fresnel-power',
-        '--'+id+'-texture-type','--'+id+'-texture-scale','--'+id+'-texture-strength','--'+id+'-texture-roughness',
-        '--'+id+'-c1-r','--'+id+'-c1-g','--'+id+'-c1-b','--'+id+'-c1-a',
-        '--'+id+'-c2-r','--'+id+'-c2-g','--'+id+'-c2-b','--'+id+'-c2-a',
-        '--'+id+'-c3-r','--'+id+'-c3-g','--'+id+'-c3-b','--'+id+'-c3-a',
-        '--'+id+'-c4-r','--'+id+'-c4-g','--'+id+'-c4-b','--'+id+'-c4-a',
-        '--'+id+'-fresnel-r','--'+id+'-fresnel-g','--'+id+'-fresnel-b','--'+id+'-fresnel-a',
-        '--'+id+'-tex-r','--'+id+'-tex-g','--'+id+'-tex-b','--'+id+'-tex-a'
-      );
+    const p=['--band-id','--border-size','--radius','--base-angle','--scroll-progress','--scroll-drive','--light-elevation','--light-intensity'];
+    for(let i=1;i<=6;i++) p.push('--g'+i+'-r','--g'+i+'-g','--g'+i+'-b','--g'+i+'-a');
+    const ids=['m','o','s','i'];
+    for(const id of ids){
+      p.push('--'+id+'-enable','--'+id+'-width','--'+id+'-offset');
+      p.push('--'+id+'-bg-type','--'+id+'-bg-angle','--'+id+'-bg-alpha','--'+id+'-bg-blend');
+      p.push('--'+id+'-conic-enable','--'+id+'-conic-alpha','--'+id+'-conic-blend','--'+id+'-conic-order','--'+id+'-arms-count','--'+id+'-arms-width','--'+id+'-arms-contrast','--'+id+'-arms-spin');
+      p.push('--'+id+'-fresnel-strength','--'+id+'-fresnel-width','--'+id+'-fresnel-power');
+      p.push('--'+id+'-texture-type','--'+id+'-texture-scale','--'+id+'-texture-strength','--'+id+'-texture-roughness');
+      p.push('--'+id+'-fresnel-palette','--'+id+'-fresnel-alpha-mul','--'+id+'-tex-palette','--'+id+'-tex-alpha-mul');
+      for(let s=1;s<=4;s++) p.push('--'+id+'-st'+s+'-pos','--'+id+'-st'+s+'-palette','--'+id+'-st'+s+'-alpha');
     }
-    return props;
+    return p;
   }
-  p(props,n,d=0){ const v=parseFloat((props.get(n)||'').toString()); return Number.isFinite(v)?v:d; }
-  c(props,pfx,n){ return [this.p(props,'--'+pfx+'-'+n+'-r',255),this.p(props,'--'+pfx+'-'+n+'-g',255),this.p(props,'--'+pfx+'-'+n+'-b',255),this.p(props,'--'+pfx+'-'+n+'-a',1)]; }
-  hash(x,y){ return (Math.sin(x*127.1+y*311.7)*43758.5453)%1; }
 
-  grad(ctx, type, angle, cx, cy, w, h, border) {
-    if (type===1) return ctx.createLinearGradient(cx-Math.cos(angle)*cx, cy-Math.sin(angle)*cy, cx+Math.cos(angle)*cx, cy+Math.sin(angle)*cy);
-    if (type===2) return ctx.createRadialGradient(cx,cy,border*0.2,cx,cy,Math.max(w,h)*0.55);
+  p(props,n,d=0){ const v=parseFloat((props.get(n)||'').toString()); return Number.isFinite(v)?v:d; }
+  pal(props,idx){ const i=Math.max(1,Math.min(6,Math.floor(idx))); return [this.p(props,'--g'+i+'-r',255),this.p(props,'--g'+i+'-g',255),this.p(props,'--g'+i+'-b',255),this.p(props,'--g'+i+'-a',1)]; }
+  hash(x,y){ return (Math.sin(x*127.1+y*311.7)*43758.5453)%1; }
+  compName(v){ const map=['source-over','overlay','screen','multiply','soft-light','hard-light','color-dodge','color-burn','difference','luminosity']; return map[Math.max(0,Math.min(map.length-1,Math.floor(v)))] || 'source-over'; }
+
+  grad(ctx,type,angle,cx,cy,w,h,b){
+    if(type===1) return ctx.createLinearGradient(cx-Math.cos(angle)*cx,cy-Math.sin(angle)*cy,cx+Math.cos(angle)*cx,cy+Math.sin(angle)*cy);
+    if(type===2) return ctx.createRadialGradient(cx,cy,b*0.2,cx,cy,Math.max(w,h)*0.6);
     return ctx.createConicGradient(angle,cx,cy);
   }
 
-  bandCenter(border, width, offset, bandId) {
-    if (bandId===0) return Math.max(width*0.5, width*0.5 + offset);           // outer bevel center
-    if (bandId===2) return Math.max(width*0.5, border - width*0.5 + offset);  // inner bevel center
-    return Math.max(width*0.5, border*0.5 + offset);                           // surface center
+  lineCenter(border,width,offset,band){
+    if(band===1) return Math.max(width*0.5, width*0.5 + offset); // outer bevel
+    if(band===3) return Math.max(width*0.5, border - width*0.5 + offset); // inner bevel
+    if(band===2) return Math.max(width*0.5, border*0.5 + offset); // surface
+    return Math.max(width*0.5, border*0.5 + offset); // main
   }
 
-  strokeBand(ctx, inset, w, h, radius, width) {
-    if (width<=0 || w<=inset*2 || h<=inset*2) return;
+  strokeBand(ctx,inset,w,h,radius,width){
+    if(width<=0||w<=inset*2||h<=inset*2) return;
     ctx.lineWidth=width;
     ctx.beginPath();
-    ctx.roundRect(inset, inset, Math.max(0,w-inset*2), Math.max(0,h-inset*2), Math.max(0,radius-inset));
+    ctx.roundRect(inset,inset,Math.max(0,w-inset*2),Math.max(0,h-inset*2),Math.max(0,radius-inset));
     ctx.stroke();
   }
 
-  paint(ctx, size, props) {
-    const bandId = Math.floor(this.p(props,'--band-id',0));
-    const pfx = ['o','s','i'][Math.max(0,Math.min(2,bandId))];
+  makeStops(props,pfx){
+    const st=[];
+    for(let i=1;i<=4;i++){
+      st.push({
+        pos: Math.max(0,Math.min(1,this.p(props,'--'+pfx+'-st'+i+'-pos',(i-1)/3))),
+        pal: this.p(props,'--'+pfx+'-st'+i+'-palette',i),
+        am: this.p(props,'--'+pfx+'-st'+i+'-alpha',1)
+      });
+    }
+    st.sort((a,b)=>a.pos-b.pos);
+    return st;
+  }
 
-    const w=size.width, h=size.height;
-    const border=Math.max(0,this.p(props,'--border-size',20));
+  drawBg(ctx,props,pfx,w,h,cx,cy,angle,border,radius,center,width){
+    const type=Math.floor(this.p(props,'--'+pfx+'-bg-type',0));
+    const aMul=this.p(props,'--'+pfx+'-bg-alpha',1);
+    const bmode=this.compName(this.p(props,'--'+pfx+'-bg-blend',0));
+    const gAngle=(this.p(props,'--'+pfx+'-bg-angle',0)+angle*180/Math.PI)*(Math.PI/180);
+    const g=this.grad(ctx,type,gAngle,cx,cy,w,h,border);
+    for(const s of this.makeStops(props,pfx)){
+      const c=this.pal(props,s.pal);
+      g.addColorStop(s.pos,'rgba('+c[0]+','+c[1]+','+c[2]+','+(c[3]*s.am*aMul)+')');
+    }
+    ctx.globalCompositeOperation=bmode;
+    ctx.strokeStyle=g;
+    this.strokeBand(ctx,center,w,h,radius,width);
+    ctx.globalCompositeOperation='source-over';
+  }
+
+  drawConic(ctx,props,pfx,w,h,cx,cy,angle,border,radius,center,width){
+    if(this.p(props,'--'+pfx+'-conic-enable',1)<0.5) return;
+    const aMul=this.p(props,'--'+pfx+'-conic-alpha',1);
+    const bmode=this.compName(this.p(props,'--'+pfx+'-conic-blend',1));
+    const arms=Math.max(1,Math.floor(this.p(props,'--'+pfx+'-arms-count',10)));
+    const aw=Math.max(0.01,Math.min(0.99,this.p(props,'--'+pfx+'-arms-width',0.3)));
+    const ac=this.p(props,'--'+pfx+'-arms-contrast',0.5);
+    const spin=this.p(props,'--'+pfx+'-arms-spin',1.2);
+
+    const arm=ctx.createConicGradient(angle*spin,cx,cy);
+    for(let i=0;i<arms;i++){
+      const s=i/arms,m=(i+aw*0.5)/arms,e=(i+aw)/arms;
+      arm.addColorStop(s%1,'rgba(255,255,255,0)');
+      arm.addColorStop(m%1,'rgba(255,255,255,'+(0.34*ac*aMul)+')');
+      arm.addColorStop(e%1,'rgba(0,0,0,'+(0.16*ac*aMul)+')');
+    }
+    ctx.globalCompositeOperation=bmode;
+    ctx.strokeStyle=arm;
+    this.strokeBand(ctx,center,w,h,radius,width);
+    ctx.globalCompositeOperation='source-over';
+  }
+
+  drawFresnel(ctx,props,pfx,w,h,radius,center,width,elev,inten){
+    const s=this.p(props,'--'+pfx+'-fresnel-strength',0.4);
+    if(s<=0) return;
+    const fw=this.p(props,'--'+pfx+'-fresnel-width',0.35);
+    const fp=Math.max(0.2,this.p(props,'--'+pfx+'-fresnel-power',3));
+    const pidx=this.p(props,'--'+pfx+'-fresnel-palette',6);
+    const mul=this.p(props,'--'+pfx+'-fresnel-alpha-mul',1);
+    const c=this.pal(props,pidx);
+
+    const steps=Math.max(8,Math.floor(width*2));
+    for(let i=0;i<steps;i++){
+      const t=i/steps;
+      const edge=Math.abs((t-0.5)/0.5);
+      const fr=Math.pow(1-edge,fp)*s*(0.5+elev*0.75)*inten;
+      const a=fr*Math.max(0,1-Math.abs(t-fw));
+      if(a<0.0007) continue;
+      ctx.strokeStyle='rgba('+c[0]+','+c[1]+','+c[2]+','+(c[3]*a*mul)+')';
+      this.strokeBand(ctx,center - width*0.5 + t*width,w,h,radius,Math.max(0.45,width/steps+0.2));
+    }
+  }
+
+  drawTexture(ctx,props,pfx,w,h,radius,center,width,angle){
+    const tt=Math.floor(this.p(props,'--'+pfx+'-texture-type',1));
+    if(tt===0) return;
+    const ts=Math.max(0.1,this.p(props,'--'+pfx+'-texture-scale',1));
+    const ta=this.p(props,'--'+pfx+'-texture-strength',0.35);
+    const tr=this.p(props,'--'+pfx+'-texture-roughness',0.3);
+    const col=this.pal(props,this.p(props,'--'+pfx+'-tex-palette',1));
+    const am=this.p(props,'--'+pfx+'-tex-alpha-mul',1);
+
+    const rw=Math.max(1,w-center*2), rh=Math.max(1,h-center*2);
+    const per=Math.max(1,2*(rw+rh));
+    const cnt=Math.min(1300,Math.floor(per*(0.11+ts*0.08)));
+    ctx.strokeStyle='rgba('+col[0]+','+col[1]+','+col[2]+','+(col[3]*ta*0.28*am)+')';
+    ctx.fillStyle='rgba('+col[0]+','+col[1]+','+col[2]+','+(col[3]*ta*0.24*am)+')';
+    for(let i=0;i<cnt;i++){
+      const u=i/cnt, side=Math.floor(u*4), t=(u*4)-side;
+      let x=0,y=0;
+      if(side===0){x=center+rw*t;y=center;} else if(side===1){x=center+rw;y=center+rh*t;} else if(side===2){x=center+rw*(1-t);y=center+rh;} else {x=center;y=center+rh*(1-t);}        
+      const nx=(this.hash(i,13.1)-0.5)*width*0.6, ny=(this.hash(i,27.7)-0.5)*width*0.6;
+      if(tt===1){
+        const len=1.2+this.hash(i,55.1)*width*0.4;
+        ctx.beginPath(); ctx.moveTo(x+nx,y+ny); ctx.lineTo(x+nx+Math.cos(angle)*len,y+ny+Math.sin(angle)*len); ctx.stroke();
+      } else if(tt===2){
+        const r=0.3+this.hash(i,41.3)*1.3*tr; ctx.beginPath(); ctx.arc(x+nx,y+ny,r,0,Math.PI*2); ctx.fill();
+      } else if(tt===3){
+        const r=0.45+this.hash(i,71.9)*2.1*tr; ctx.beginPath(); ctx.arc(x+nx,y+ny,r,0,Math.PI*2); ctx.stroke();
+      } else {
+        const l=1+this.hash(i,62.2)*2.4; ctx.beginPath(); ctx.moveTo(x+nx-l,y+ny); ctx.lineTo(x+nx+l,y+ny); ctx.moveTo(x+nx,y+ny-l); ctx.lineTo(x+nx,y+ny+l); ctx.stroke();
+      }
+    }
+  }
+
+  paint(ctx,size,props){
+    const bandId=Math.floor(this.p(props,'--band-id',0));
+    const pfx=['m','o','s','i'][Math.max(0,Math.min(3,bandId))];
+
+    const w=size.width,h=size.height;
+    const border=Math.max(0,this.p(props,'--border-size',22));
     if(border<=0.01) return;
-    const radius=Math.max(0,this.p(props,'--radius',34));
-    const enabled=this.p(props,'--'+pfx+'-enable',1);
-    if(enabled<0.5) return;
+    if(this.p(props,'--'+pfx+'-enable',1)<0.5) return;
 
     const width=Math.max(0,this.p(props,'--'+pfx+'-width',6));
     if(width<=0.01) return;
     const offset=this.p(props,'--'+pfx+'-offset',0);
 
+    const radius=Math.max(0,this.p(props,'--radius',40));
     const base=this.p(props,'--base-angle',0), prog=this.p(props,'--scroll-progress',0), drive=this.p(props,'--scroll-drive',1);
     const angle=((base + prog*360*drive)%360)*(Math.PI/180);
-    const elev=this.p(props,'--light-elevation',0.75), inten=this.p(props,'--light-intensity',1.2);
+    const elev=this.p(props,'--light-elevation',0.78), inten=this.p(props,'--light-intensity',1.2);
     const cx=w*0.5, cy=h*0.5;
 
-    const c1=this.c(props,pfx,'c1'), c2=this.c(props,pfx,'c2'), c3=this.c(props,pfx,'c3'), c4=this.c(props,pfx,'c4');
-    const gType=Math.floor(this.p(props,'--'+pfx+'-grad-type',0));
-    const interp=Math.max(0.2,this.p(props,'--'+pfx+'-interp',1));
+    const center=this.lineCenter(border,width,offset,bandId);
+    const conicOrder=Math.floor(this.p(props,'--'+pfx+'-conic-order',1)); // 0 below bg, 1 above bg
 
-    const center=this.bandCenter(border,width,offset,bandId);
-
-    const g=this.grad(ctx,gType,angle,cx,cy,w,h,border);
-    g.addColorStop(0,'rgba('+c1[0]+','+c1[1]+','+c1[2]+','+c1[3]+')');
-    g.addColorStop(Math.min(1,Math.pow(0.26,interp)),'rgba('+c2[0]+','+c2[1]+','+c2[2]+','+c2[3]+')');
-    g.addColorStop(Math.min(1,Math.pow(0.64,interp)),'rgba('+c3[0]+','+c3[1]+','+c3[2]+','+c3[3]+')');
-    g.addColorStop(1,'rgba('+c4[0]+','+c4[1]+','+c4[2]+','+c4[3]+')');
-
-    ctx.strokeStyle=g;
-    this.strokeBand(ctx,center,w,h,radius,width);
-
-    // directional arms inside each line
-    const arms=Math.max(1,Math.floor(this.p(props,'--'+pfx+'-arms-count',8)));
-    const aw=Math.max(0.01,Math.min(0.99,this.p(props,'--'+pfx+'-arms-width',0.3)));
-    const ac=this.p(props,'--'+pfx+'-arms-contrast',0.5);
-    const spin=this.p(props,'--'+pfx+'-arms-spin',1.2);
-    const arm=ctx.createConicGradient(angle*spin,cx,cy);
-    for(let i=0;i<arms;i++){
-      const s=i/arms,m=(i+aw*0.5)/arms,e=(i+aw)/arms;
-      arm.addColorStop(s%1,'rgba(255,255,255,0)');
-      arm.addColorStop(m%1,'rgba(255,255,255,'+(0.32*ac)+')');
-      arm.addColorStop(e%1,'rgba(0,0,0,'+(0.15*ac)+')');
-    }
-    ctx.globalCompositeOperation='overlay';
-    ctx.strokeStyle=arm;
-    this.strokeBand(ctx,center,w,h,radius,width);
-    ctx.globalCompositeOperation='source-over';
-
-    // Fresnel on the same line
-    const frS=this.p(props,'--'+pfx+'-fresnel-strength',0.4);
-    const frW=this.p(props,'--'+pfx+'-fresnel-width',0.35);
-    const frP=Math.max(0.2,this.p(props,'--'+pfx+'-fresnel-power',3));
-    const frc=this.c(props,pfx,'fresnel');
-    if(frS>0){
-      const steps=Math.max(8,Math.floor(width*2));
-      for(let i=0;i<steps;i++){
-        const t=i/steps;
-        const edge=Math.abs((t-0.5)/0.5);
-        const fres=Math.pow(1-edge,frP) * frS * (0.5 + elev*0.7) * inten;
-        const a=fres*Math.max(0,1-Math.abs(t-frW));
-        if(a<=0.0007) continue;
-        ctx.strokeStyle='rgba('+frc[0]+','+frc[1]+','+frc[2]+','+(frc[3]*a)+')';
-        this.strokeBand(ctx, center - width*0.5 + t*width, w, h, radius, Math.max(0.45,width/steps+0.2));
-      }
-    }
-
-    // Texture per line
-    const tt=Math.floor(this.p(props,'--'+pfx+'-texture-type',1));
-    if(tt!==0){
-      const ts=Math.max(0.1,this.p(props,'--'+pfx+'-texture-scale',1));
-      const ta=this.p(props,'--'+pfx+'-texture-strength',0.35);
-      const tr=this.p(props,'--'+pfx+'-texture-roughness',0.3);
-      const tc=this.c(props,pfx,'tex');
-      const rw=Math.max(1,w-center*2), rh=Math.max(1,h-center*2);
-      const perim=Math.max(1,2*(rw+rh));
-      const cnt=Math.min(1200,Math.floor(perim*(0.11+ts*0.08)));
-      ctx.strokeStyle='rgba('+tc[0]+','+tc[1]+','+tc[2]+','+(tc[3]*ta*0.28)+')';
-      ctx.fillStyle='rgba('+tc[0]+','+tc[1]+','+tc[2]+','+(tc[3]*ta*0.24)+')';
-      for(let i=0;i<cnt;i++){
-        const u=i/cnt; const side=Math.floor(u*4), t=(u*4)-side;
-        let x=0,y=0;
-        if(side===0){x=center+rw*t;y=center;} else if(side===1){x=center+rw;y=center+rh*t;} else if(side===2){x=center+rw*(1-t);y=center+rh;} else {x=center;y=center+rh*(1-t);}        
-        const nx=(this.hash(i,13.1)-0.5)*width*0.6;
-        const ny=(this.hash(i,27.7)-0.5)*width*0.6;
-        if(tt===1){
-          const len=1.2 + this.hash(i,55.1)*width*0.4;
-          ctx.beginPath(); ctx.moveTo(x+nx,y+ny); ctx.lineTo(x+nx+Math.cos(angle)*len,y+ny+Math.sin(angle)*len); ctx.stroke();
-        } else if(tt===2){
-          const r=0.3 + this.hash(i,41.3)*1.3*tr;
-          ctx.beginPath(); ctx.arc(x+nx,y+ny,r,0,Math.PI*2); ctx.fill();
-        } else if(tt===3){
-          const r=0.45 + this.hash(i,71.9)*2.1*tr;
-          ctx.beginPath(); ctx.arc(x+nx,y+ny,r,0,Math.PI*2); ctx.stroke();
-        } else {
-          const l=1 + this.hash(i,62.2)*2.4;
-          ctx.beginPath(); ctx.moveTo(x+nx-l,y+ny); ctx.lineTo(x+nx+l,y+ny); ctx.moveTo(x+nx,y+ny-l); ctx.lineTo(x+nx,y+ny+l); ctx.stroke();
-        }
-      }
-    }
+    if(conicOrder===0) this.drawConic(ctx,props,pfx,w,h,cx,cy,angle,border,radius,center,width);
+    this.drawBg(ctx,props,pfx,w,h,cx,cy,angle,border,radius,center,width);
+    if(conicOrder!==0) this.drawConic(ctx,props,pfx,w,h,cx,cy,angle,border,radius,center,width);
+    this.drawFresnel(ctx,props,pfx,w,h,radius,center,width,elev,inten);
+    this.drawTexture(ctx,props,pfx,w,h,radius,center,width,angle);
   }
 }
 registerPaint('metal-band', MetalBandPainter);
@@ -292,65 +302,112 @@ registerPaint('metal-band', MetalBandPainter);
 })();
 
 const root=document.documentElement;
+const blendOpts=['source-over','overlay','screen','multiply','soft-light','hard-light','color-dodge','color-burn','difference','luminosity'];
+const blendLabels=['Normal','Overlay','Screen','Multiply','Soft light','Hard light','Color dodge','Color burn','Difference','Luminosity'];
+
 function setVar(k,v){ root.style.setProperty(k,String(v)); }
 function out(k,v){ const o=document.querySelector('[data-out="'+k+'"]'); if(o) o.textContent=String(v); }
-
-function bindVar(el){
-  const key=el.dataset.var;
-  const apply=()=>{ setVar(key,el.value); out(key,el.value); };
-  el.addEventListener('input',apply,{passive:true});
-  apply();
-}
-
+function bindVar(el){ const key=el.dataset.var; const apply=()=>{ setVar(key,el.value); out(key,el.value); }; el.addEventListener('input',apply,{passive:true}); apply(); }
 function hexToRgb(hex){ const v=parseInt(hex.replace('#',''),16); return {r:(v>>16)&255,g:(v>>8)&255,b:v&255}; }
-function bindColor(input,prefix){
-  const apply=()=>{ const c=hexToRgb(input.value); setVar(prefix+'-r',c.r); setVar(prefix+'-g',c.g); setVar(prefix+'-b',c.b); };
-  input.addEventListener('input',apply,{passive:true});
-  apply();
+function bindColor(input,prefix){ const apply=()=>{ const c=hexToRgb(input.value); setVar(prefix+'-r',c.r); setVar(prefix+'-g',c.g); setVar(prefix+'-b',c.b); }; input.addEventListener('input',apply,{passive:true}); apply(); }
+
+const gp=document.getElementById('global-palette');
+for(let i=1;i<=6;i++){
+  const row=document.createElement('div');
+  row.className='row2';
+  row.innerHTML='<label><span class="cap">G'+i+' color</span><input type="color" data-color="--g'+i+'" value="'+['#fafcff','#c2ccdc','#8692a6','#4b5668','#262f3d','#dfeeff'][i-1]+'"></label>'+
+                '<label><span class="cap">G'+i+' alpha <output data-out="--g'+i+'-a"></output></span><input data-var="--g'+i+'-a" type="range" min="0" max="1" step="0.01" value="'+[0.95,0.88,0.82,0.9,0.92,0.7][i-1]+'"></label>';
+  gp.appendChild(row);
 }
 
-function createBandUI(prefix, label, defaults){
-  const host=document.createElement('div');
-  host.className='sec';
-  host.innerHTML='\n    <h3>'+label+' (independent metal line)</h3>\n    <label><span class="cap">Enable</span><select data-var="--'+prefix+'-enable"><option value="1">On</option><option value="0">Off</option></select></label>\n    <label><span class="cap">Width <output data-out="--'+prefix+'-width"></output></span><input data-var="--'+prefix+'-width" type="range" min="0" max="40" step="0.1" value="'+defaults.width+'"></label>\n    <label><span class="cap">Edge offset <output data-out="--'+prefix+'-offset"></output></span><input data-var="--'+prefix+'-offset" type="range" min="-30" max="30" step="0.1" value="'+defaults.offset+'"></label>\n\n    <label><span class="cap">Gradient type</span><select data-var="--'+prefix+'-grad-type"><option value="0">Conic</option><option value="1">Linear</option><option value="2">Radial</option></select></label>\n    <label><span class="cap">Interpolation <output data-out="--'+prefix+'-interp"></output></span><input data-var="--'+prefix+'-interp" type="range" min="0.2" max="3" step="0.01" value="'+defaults.interp+'"></label>\n\n    <label><span class="cap">Arms count <output data-out="--'+prefix+'-arms-count"></output></span><input data-var="--'+prefix+'-arms-count" type="range" min="1" max="40" step="1" value="'+defaults.armsCount+'"></label>\n    <label><span class="cap">Arms width <output data-out="--'+prefix+'-arms-width"></output></span><input data-var="--'+prefix+'-arms-width" type="range" min="0.01" max="0.99" step="0.01" value="'+defaults.armsWidth+'"></label>\n    <label><span class="cap">Arms contrast <output data-out="--'+prefix+'-arms-contrast"></output></span><input data-var="--'+prefix+'-arms-contrast" type="range" min="0" max="1" step="0.01" value="'+defaults.armsContrast+'"></label>\n    <label><span class="cap">Arms spin <output data-out="--'+prefix+'-arms-spin"></output></span><input data-var="--'+prefix+'-arms-spin" type="range" min="0" max="6" step="0.01" value="'+defaults.armsSpin+'"></label>\n\n    <div class="row2" data-colors></div>\n\n    <label><span class="cap">Fresnel strength <output data-out="--'+prefix+'-fresnel-strength"></output></span><input data-var="--'+prefix+'-fresnel-strength" type="range" min="0" max="2" step="0.01" value="'+defaults.fStrength+'"></label>\n    <label><span class="cap">Fresnel width <output data-out="--'+prefix+'-fresnel-width"></output></span><input data-var="--'+prefix+'-fresnel-width" type="range" min="0" max="1" step="0.01" value="'+defaults.fWidth+'"></label>\n    <label><span class="cap">Fresnel power <output data-out="--'+prefix+'-fresnel-power"></output></span><input data-var="--'+prefix+'-fresnel-power" type="range" min="0.2" max="8" step="0.01" value="'+defaults.fPower+'"></label>\n    <div class="row2">\n      <label><span class="cap">Fresnel color</span><input type="color" data-color="--'+prefix+'-fresnel" value="'+defaults.fColor+'"></label>\n      <label><span class="cap">Fresnel alpha <output data-out="--'+prefix+'-fresnel-a"></output></span><input data-var="--'+prefix+'-fresnel-a" type="range" min="0" max="1" step="0.01" value="'+defaults.fAlpha+'"></label>\n    </div>\n\n    <label><span class="cap">Texture type</span><select data-var="--'+prefix+'-texture-type"><option value="0">None</option><option value="1">Brushed</option><option value="2">Cast</option><option value="3">Hammered</option><option value="4">Anisotropic Cross</option></select></label>\n    <label><span class="cap">Texture scale <output data-out="--'+prefix+'-texture-scale"></output></span><input data-var="--'+prefix+'-texture-scale" type="range" min="0.1" max="8" step="0.01" value="'+defaults.tScale+'"></label>\n    <label><span class="cap">Texture strength <output data-out="--'+prefix+'-texture-strength"></output></span><input data-var="--'+prefix+'-texture-strength" type="range" min="0" max="1" step="0.01" value="'+defaults.tStrength+'"></label>\n    <label><span class="cap">Texture roughness <output data-out="--'+prefix+'-texture-roughness"></output></span><input data-var="--'+prefix+'-texture-roughness" type="range" min="0" max="1" step="0.01" value="'+defaults.tRough+'"></label>\n    <div class="row2">\n      <label><span class="cap">Texture tint</span><input type="color" data-color="--'+prefix+'-tex" value="'+defaults.tColor+'"></label>\n      <label><span class="cap">Texture alpha <output data-out="--'+prefix+'-tex-a"></output></span><input data-var="--'+prefix+'-tex-a" type="range" min="0" max="1" step="0.01" value="'+defaults.tAlpha+'"></label>\n    </div>\n\n    <h3>Mix + Filters ('+label+')</h3>\n    <label><span class="cap">Blend</span><select data-var="--'+prefix+'-blend"><option>normal</option><option>overlay</option><option>screen</option><option>multiply</option><option>soft-light</option><option>hard-light</option><option>color-dodge</option><option>color-burn</option><option>difference</option><option>luminosity</option></select></label>\n    <label><span class="cap">Opacity <output data-out="--'+prefix+'-opacity"></output></span><input data-var="--'+prefix+'-opacity" type="range" min="0" max="1" step="0.01" value="'+defaults.opacity+'"></label>\n    <label><span class="cap">Brightness <output data-out="--'+prefix+'-brightness"></output></span><input data-var="--'+prefix+'-brightness" type="range" min="0.2" max="3" step="0.01" value="'+defaults.brightness+'"></label>\n    <label><span class="cap">Contrast <output data-out="--'+prefix+'-contrast"></output></span><input data-var="--'+prefix+'-contrast" type="range" min="0.2" max="3" step="0.01" value="'+defaults.contrast+'"></label>\n    <label><span class="cap">Saturate <output data-out="--'+prefix+'-saturate"></output></span><input data-var="--'+prefix+'-saturate" type="range" min="0" max="4" step="0.01" value="'+defaults.saturate+'"></label>\n    <label><span class="cap">Hue <output data-out="--'+prefix+'-hue"></output></span><input data-var="--'+prefix+'-hue" type="range" min="0" max="360" step="1" value="'+defaults.hue+'"></label>\n    <label><span class="cap">Blur <output data-out="--'+prefix+'-blur"></output></span><input data-var="--'+prefix+'-blur" type="range" min="0" max="6" step="0.1" value="'+defaults.blur+'"></label>\n  ';
-
-  const colorArea=host.querySelector('[data-colors]');
-  const stops=[['c1',defaults.c1,defaults.a1],['c2',defaults.c2,defaults.a2],['c3',defaults.c3,defaults.a3],['c4',defaults.c4,defaults.a4]];
-  for(const [id,hex,a] of stops){
-    const row=document.createElement('label');
-    row.innerHTML='<span class="cap">'+id.toUpperCase()+' color</span><input type="color" data-color="--'+prefix+'-'+id+'" value="'+hex+'">\n<span class="cap">'+id.toUpperCase()+' alpha <output data-out="--'+prefix+'-'+id+'-a"></output></span><input data-var="--'+prefix+'-'+id+'-a" type="range" min="0" max="1" step="0.01" value="'+a+'">';
-    colorArea.appendChild(row);
+function addStopsUI(host,pfx){
+  const wrap=document.createElement('div'); wrap.className='sec';
+  wrap.innerHTML='<h3>'+pfx.toUpperCase()+' background stops</h3>';
+  for(let i=1;i<=4;i++){
+    const r=document.createElement('div'); r.className='row3';
+    r.innerHTML='<label><span class="cap">S'+i+' pos <output data-out="--'+pfx+'-st'+i+'-pos"></output></span><input data-var="--'+pfx+'-st'+i+'-pos" type="range" min="0" max="1" step="0.01" value="'+[(0),(0.28),(0.64),(1)][i-1]+'"></label>'+ 
+      '<label><span class="cap">S'+i+' palette</span><select data-var="--'+pfx+'-st'+i+'-palette">'+[1,2,3,4,5,6].map(v=>'<option value="'+v+'">G'+v+'</option>').join('')+'</select></label>'+
+      '<label><span class="cap">S'+i+' alpha <output data-out="--'+pfx+'-st'+i+'-alpha"></output></span><input data-var="--'+pfx+'-st'+i+'-alpha" type="range" min="0" max="1" step="0.01" value="1"></label>';
+    wrap.appendChild(r);
   }
-
-  return host;
+  host.appendChild(wrap);
 }
 
-const bandsHost=document.getElementById('bands');
-bandsHost.appendChild(createBandUI('o','Outer Bevel',{
-  width:5.5,offset:0,interp:1.2,armsCount:8,armsWidth:.28,armsContrast:.55,armsSpin:1.15,
-  c1:'#ffffff',a1:.95,c2:'#d6dde8',a2:.86,c3:'#8e9bb0',a3:.68,c4:'#f8fcff',a4:.6,
-  fStrength:.55,fWidth:.35,fPower:3.6,fColor:'#ebf6ff',fAlpha:.82,
-  tScale:1.1,tStrength:.24,tRough:.22,tColor:'#ffffff',tAlpha:.65,
-  opacity:1,brightness:1.08,contrast:1.15,saturate:1.05,hue:0,blur:0
-}));
-bandsHost.appendChild(createBandUI('s','Surface',{
-  width:10,offset:0,interp:1.05,armsCount:12,armsWidth:.35,armsContrast:.5,armsSpin:1.22,
-  c1:'#e7ecf5',a1:.94,c2:'#9daabd',a2:.88,c3:'#4f5a6c',a3:.9,c4:'#dbe2ef',a4:.72,
-  fStrength:.36,fWidth:.26,fPower:2.8,fColor:'#cae1ff',fAlpha:.68,
-  tScale:1.3,tStrength:.42,tRough:.33,tColor:'#f7f9ff',tAlpha:.75,
-  opacity:1,brightness:1,contrast:1.08,saturate:1.08,hue:0,blur:0
-}));
-bandsHost.appendChild(createBandUI('i','Inner Bevel',{
-  width:5.5,offset:0,interp:1.25,armsCount:8,armsWidth:.28,armsContrast:.48,armsSpin:1.1,
-  c1:'#8a95ab',a1:.72,c2:'#3f495b',a2:.9,c3:'#131821',a3:.96,c4:'#2b3442',a4:.76,
-  fStrength:.22,fWidth:.2,fPower:4.1,fColor:'#9bc8ff',fAlpha:.5,
-  tScale:1.05,tStrength:.3,tRough:.4,tColor:'#dce4ef',tAlpha:.52,
-  opacity:1,brightness:.95,contrast:1.2,saturate:.95,hue:0,blur:0
-}));
+function createBandUI(pfx,label,d){
+  const sec=document.createElement('div'); sec.className='sec';
+  sec.innerHTML='\
+    <h3>'+label+'</h3>\
+    <label><span class="cap">Enable</span><select data-var="--'+pfx+'-enable"><option value="1">On</option><option value="0">Off</option></select></label>\
+    <label><span class="cap">Width <output data-out="--'+pfx+'-width"></output></span><input data-var="--'+pfx+'-width" type="range" min="0" max="48" step="0.1" value="'+d.width+'"></label>\
+    <label><span class="cap">Offset <output data-out="--'+pfx+'-offset"></output></span><input data-var="--'+pfx+'-offset" type="range" min="-36" max="36" step="0.1" value="'+d.offset+'"></label>\
+\
+    <h3>'+label+' Background/Gradient</h3>\
+    <label><span class="cap">BG type</span><select data-var="--'+pfx+'-bg-type"><option value="0">Conic</option><option value="1">Linear</option><option value="2">Radial</option></select></label>\
+    <label><span class="cap">BG angle <output data-out="--'+pfx+'-bg-angle"></output></span><input data-var="--'+pfx+'-bg-angle" type="range" min="0" max="360" step="1" value="'+d.bgAngle+'"></label>\
+    <label><span class="cap">BG alpha <output data-out="--'+pfx+'-bg-alpha"></output></span><input data-var="--'+pfx+'-bg-alpha" type="range" min="0" max="1" step="0.01" value="'+d.bgAlpha+'"></label>\
+    <label><span class="cap">BG blend</span><select data-var="--'+pfx+'-bg-blend">'+blendLabels.map((n,i)=>'<option value="'+i+'">'+n+'</option>').join('')+'</select></label>\
+\
+    <h3>'+label+' Conic Overlay</h3>\
+    <label><span class="cap">Conic enabled</span><select data-var="--'+pfx+'-conic-enable"><option value="1">On</option><option value="0">Off</option></select></label>\
+    <label><span class="cap">Conic on top?</span><select data-var="--'+pfx+'-conic-order"><option value="1">Yes (above BG)</option><option value="0">No (behind BG)</option></select></label>\
+    <label><span class="cap">Conic alpha <output data-out="--'+pfx+'-conic-alpha"></output></span><input data-var="--'+pfx+'-conic-alpha" type="range" min="0" max="1" step="0.01" value="'+d.conicAlpha+'"></label>\
+    <label><span class="cap">Conic blend</span><select data-var="--'+pfx+'-conic-blend">'+blendLabels.map((n,i)=>'<option value="'+i+'">'+n+'</option>').join('')+'</select></label>\
+    <label><span class="cap">Arms count <output data-out="--'+pfx+'-arms-count"></output></span><input data-var="--'+pfx+'-arms-count" type="range" min="1" max="48" step="1" value="'+d.armsCount+'"></label>\
+    <label><span class="cap">Arms width <output data-out="--'+pfx+'-arms-width"></output></span><input data-var="--'+pfx+'-arms-width" type="range" min="0.01" max="0.99" step="0.01" value="'+d.armsWidth+'"></label>\
+    <label><span class="cap">Arms contrast <output data-out="--'+pfx+'-arms-contrast"></output></span><input data-var="--'+pfx+'-arms-contrast" type="range" min="0" max="1" step="0.01" value="'+d.armsContrast+'"></label>\
+    <label><span class="cap">Arms spin <output data-out="--'+pfx+'-arms-spin"></output></span><input data-var="--'+pfx+'-arms-spin" type="range" min="0" max="8" step="0.01" value="'+d.armsSpin+'"></label>\
+\
+    <h3>'+label+' Fresnel</h3>\
+    <label><span class="cap">Strength <output data-out="--'+pfx+'-fresnel-strength"></output></span><input data-var="--'+pfx+'-fresnel-strength" type="range" min="0" max="2" step="0.01" value="'+d.fStrength+'"></label>\
+    <label><span class="cap">Width <output data-out="--'+pfx+'-fresnel-width"></output></span><input data-var="--'+pfx+'-fresnel-width" type="range" min="0" max="1" step="0.01" value="'+d.fWidth+'"></label>\
+    <label><span class="cap">Power <output data-out="--'+pfx+'-fresnel-power"></output></span><input data-var="--'+pfx+'-fresnel-power" type="range" min="0.2" max="8" step="0.01" value="'+d.fPower+'"></label>\
+    <div class="row2"><label><span class="cap">Fresnel palette</span><select data-var="--'+pfx+'-fresnel-palette">'+[1,2,3,4,5,6].map(v=>'<option value="'+v+'">G'+v+'</option>').join('')+'</select></label><label><span class="cap">Alpha mul <output data-out="--'+pfx+'-fresnel-alpha-mul"></output></span><input data-var="--'+pfx+'-fresnel-alpha-mul" type="range" min="0" max="2" step="0.01" value="'+d.fAlphaMul+'"></label></div>\
+\
+    <h3>'+label+' Texture</h3>\
+    <label><span class="cap">Texture type</span><select data-var="--'+pfx+'-texture-type"><option value="0">None</option><option value="1">Brushed</option><option value="2">Cast</option><option value="3">Hammered</option><option value="4">Anisotropic</option></select></label>\
+    <label><span class="cap">Scale <output data-out="--'+pfx+'-texture-scale"></output></span><input data-var="--'+pfx+'-texture-scale" type="range" min="0.1" max="8" step="0.01" value="'+d.tScale+'"></label>\
+    <label><span class="cap">Strength <output data-out="--'+pfx+'-texture-strength"></output></span><input data-var="--'+pfx+'-texture-strength" type="range" min="0" max="1" step="0.01" value="'+d.tStrength+'"></label>\
+    <label><span class="cap">Roughness <output data-out="--'+pfx+'-texture-roughness"></output></span><input data-var="--'+pfx+'-texture-roughness" type="range" min="0" max="1" step="0.01" value="'+d.tRough+'"></label>\
+    <div class="row2"><label><span class="cap">Texture palette</span><select data-var="--'+pfx+'-tex-palette">'+[1,2,3,4,5,6].map(v=>'<option value="'+v+'">G'+v+'</option>').join('')+'</select></label><label><span class="cap">Alpha mul <output data-out="--'+pfx+'-tex-alpha-mul"></output></span><input data-var="--'+pfx+'-tex-alpha-mul" type="range" min="0" max="2" step="0.01" value="'+d.tAlphaMul+'"></label></div>\
+\
+    <h3>'+label+' Layer Mix + Filters</h3>\
+    <label><span class="cap">Layer blend</span><select data-var="--'+pfx+'-layer-blend"><option>normal</option><option>overlay</option><option>screen</option><option>multiply</option><option>soft-light</option><option>hard-light</option><option>color-dodge</option><option>color-burn</option><option>difference</option><option>luminosity</option></select></label>\
+    <label><span class="cap">Layer opacity <output data-out="--'+pfx+'-layer-opacity"></output></span><input data-var="--'+pfx+'-layer-opacity" type="range" min="0" max="1" step="0.01" value="'+d.layerOpacity+'"></label>\
+    <label><span class="cap">Brightness <output data-out="--'+pfx+'-layer-brightness"></output></span><input data-var="--'+pfx+'-layer-brightness" type="range" min="0.2" max="3" step="0.01" value="'+d.layerBright+'"></label>\
+    <label><span class="cap">Contrast <output data-out="--'+pfx+'-layer-contrast"></output></span><input data-var="--'+pfx+'-layer-contrast" type="range" min="0.2" max="3" step="0.01" value="'+d.layerContrast+'"></label>\
+    <label><span class="cap">Saturate <output data-out="--'+pfx+'-layer-saturate"></output></span><input data-var="--'+pfx+'-layer-saturate" type="range" min="0" max="4" step="0.01" value="'+d.layerSat+'"></label>\
+    <label><span class="cap">Hue <output data-out="--'+pfx+'-layer-hue"></output></span><input data-var="--'+pfx+'-layer-hue" type="range" min="0" max="360" step="1" value="'+d.layerHue+'"></label>\
+    <label><span class="cap">Blur <output data-out="--'+pfx+'-layer-blur"></output></span><input data-var="--'+pfx+'-layer-blur" type="range" min="0" max="6" step="0.1" value="'+d.layerBlur+'"></label>\
+  ';
+  addStopsUI(sec,pfx);
+  return sec;
+}
+
+const bands=document.getElementById('bands');
+bands.appendChild(createBandUI('m','Main Border Band',{width:22,offset:0,bgAngle:0,bgAlpha:0.95,conicAlpha:0.28,armsCount:18,armsWidth:0.34,armsContrast:0.45,armsSpin:1.1,fStrength:0.25,fWidth:0.28,fPower:2.6,fAlphaMul:0.6,tScale:1.2,tStrength:0.25,tRough:0.28,tAlphaMul:0.5,layerOpacity:1,layerBright:1,layerContrast:1.08,layerSat:1.04,layerHue:0,layerBlur:0}));
+bands.appendChild(createBandUI('o','Outer Bevel',{width:5.5,offset:0,bgAngle:0,bgAlpha:1,conicAlpha:0.45,armsCount:10,armsWidth:0.27,armsContrast:0.62,armsSpin:1.18,fStrength:0.62,fWidth:0.36,fPower:3.8,fAlphaMul:0.85,tScale:1.1,tStrength:0.22,tRough:0.2,tAlphaMul:0.55,layerOpacity:1,layerBright:1.08,layerContrast:1.16,layerSat:1.02,layerHue:0,layerBlur:0}));
+bands.appendChild(createBandUI('s','Surface',{width:11,offset:0,bgAngle:0,bgAlpha:1,conicAlpha:0.35,armsCount:14,armsWidth:0.33,armsContrast:0.5,armsSpin:1.24,fStrength:0.35,fWidth:0.24,fPower:2.9,fAlphaMul:0.7,tScale:1.3,tStrength:0.45,tRough:0.35,tAlphaMul:0.8,layerOpacity:1,layerBright:1,layerContrast:1.1,layerSat:1.1,layerHue:0,layerBlur:0}));
+bands.appendChild(createBandUI('i','Inner Bevel',{width:5.5,offset:0,bgAngle:0,bgAlpha:1,conicAlpha:0.22,armsCount:8,armsWidth:0.25,armsContrast:0.44,armsSpin:1.1,fStrength:0.25,fWidth:0.2,fPower:4.2,fAlphaMul:0.55,tScale:1.0,tStrength:0.3,tRough:0.45,tAlphaMul:0.6,layerOpacity:1,layerBright:0.96,layerContrast:1.22,layerSat:0.92,layerHue:0,layerBlur:0}));
 
 for(const el of document.querySelectorAll('[data-var]')) bindVar(el);
-for(const el of document.querySelectorAll('[data-color]')) bindColor(el, el.dataset.color);
-for(const o of document.querySelectorAll('[data-out]')) if(!o.textContent) o.textContent=getComputedStyle(root).getPropertyValue(o.dataset.out).trim();
+for(const el of document.querySelectorAll('[data-color]')) bindColor(el,el.dataset.color);
+for(const outEl of document.querySelectorAll('[data-out]')) if(!outEl.textContent) outEl.textContent=getComputedStyle(root).getPropertyValue(outEl.dataset.out).trim();
+
+// realistic default stop mappings
+const presets={
+  m:[[1,0],[2,0.28],[3,0.66],[4,1]],
+  o:[[1,0],[6,0.35],[2,0.7],[1,1]],
+  s:[[2,0],[3,0.32],[4,0.7],[3,1]],
+  i:[[3,0],[4,0.35],[5,0.8],[4,1]]
+};
+for(const k of Object.keys(presets)){
+  presets[k].forEach((st,idx)=>{ setVar('--'+k+'-st'+(idx+1)+'-palette',st[0]); setVar('--'+k+'-st'+(idx+1)+'-pos',st[1]); setVar('--'+k+'-st'+(idx+1)+'-alpha',1); });
+  setVar('--'+k+'-bg-type',0);
+  setVar('--'+k+'-bg-blend',0);
+  setVar('--'+k+'-conic-enable',1);
+  setVar('--'+k+'-conic-blend',1);
+  setVar('--'+k+'-conic-order',1);
+}
 
 const hasScrollTimeline=CSS.supports('animation-timeline: scroll()');
 if(!hasScrollTimeline){
