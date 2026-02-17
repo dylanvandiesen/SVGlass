@@ -1,0 +1,2 @@
+.paint-metal{position:fixed;left:66%;top:50%;transform:translate(-50%,-50%);width:calc(var(--preview-width)*1px);height:calc(var(--preview-height)*1px);border-radius:calc(var(--radius)*1px);overflow:hidden;isolation:isolate;background:paint(metal-stack);box-shadow:calc(var(--outer-shadow-x)*1px) calc(var(--outer-shadow-y)*1px) calc(var(--outer-shadow-blur)*1px) rgba(var(--outer-shadow-r),var(--outer-shadow-g),var(--outer-shadow-b),calc(var(--outer-shadow-a)*var(--shadow-enable)))}
+@media (max-width:930px){.paint-metal{left:50%;top:24%}}
