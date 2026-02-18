@@ -38,9 +38,54 @@
       --filter-hue: 0;
       --filter-sepia: 0;
       --filter-blur: 0;
+      --scroll-y-px: 0;
+      --scroll-range-px: 1;
+      --scroll-progress: 0;
+      --vh-px: 1;
+      --quality-tier: 1;
+      --intro-start-px: 0;
+      --intro-window-px: 1;
+      --intro-progress: 0;
+      --light-start-px: 0;
+      --light-window-px: 1;
+      --light-progress: 0;
+      --section-progress: 0;
+      --light-azimuth: 30;
+      --specular-strength: 1;
+      --noise-strength: 0.35;
     }
 
     @property --light-angle {
+      syntax: "<number>";
+      inherits: true;
+      initial-value: 30;
+    }
+
+    @property --scroll-y-px {
+      syntax: "<number>";
+      inherits: true;
+      initial-value: 0;
+    }
+
+    @property --scroll-range-px {
+      syntax: "<number>";
+      inherits: true;
+      initial-value: 1;
+    }
+
+    @property --scroll-progress {
+      syntax: "<number>";
+      inherits: true;
+      initial-value: 0;
+    }
+
+    @property --section-progress {
+      syntax: "<number>";
+      inherits: true;
+      initial-value: 0;
+    }
+
+    @property --light-azimuth {
       syntax: "<number>";
       inherits: true;
       initial-value: 30;
@@ -53,7 +98,16 @@
       color: #eff4ff;
       background:
         radial-gradient(circle at 20% 10%, #3a4056 0%, #1b1d28 42%, #0f1118 100%);
-      min-height: 250vh;
+      min-height: 100dvh;
+    }
+
+    .scroll-shell {
+      height: 100dvh;
+      overflow: auto;
+      overscroll-behavior: contain;
+      contain: layout paint style;
+      scroll-timeline-name: --shell-scroll;
+      scroll-timeline-axis: block;
     }
 
     .layout {
@@ -127,8 +181,15 @@
     .stage {
       display: grid;
       place-items: center;
-      min-height: 92vh;
+      min-height: 100dvh;
       padding: 1.2rem;
+    }
+
+    .stage[data-section] {
+      min-height: 82dvh;
+      opacity: calc(0.65 + var(--section-progress) * 0.35);
+      transform: translateY(calc((1 - var(--section-progress)) * 16px));
+      transition: opacity 0.2s linear, transform 0.2s linear;
     }
 
     .card-wrap {
@@ -144,6 +205,8 @@
         hue-rotate(calc(var(--filter-hue) * 1deg))
         sepia(var(--filter-sepia))
         blur(calc(var(--filter-blur) * 1px));
+      transform: translateY(calc((1 - var(--intro-progress)) * 24px));
+      opacity: calc(0.7 + var(--intro-progress) * 0.3);
     }
 
     .card-wrap::before,
@@ -171,6 +234,71 @@
         calc(var(--inner-shadow-spread) * 1px)
         rgba(var(--inner-shadow-r), var(--inner-shadow-g), var(--inner-shadow-b), var(--inner-shadow-a));
       background: rgba(255, 255, 255, var(--fill-a));
+    }
+
+    .spacer-copy {
+      max-width: 62ch;
+      background: rgba(17, 20, 30, 0.7);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      padding: 1rem 1.2rem;
+      line-height: 1.55;
+    }
+
+    .scroll-indicator {
+      position: fixed;
+      right: 1rem;
+      top: 1rem;
+      width: 120px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.18);
+      overflow: hidden;
+      z-index: 20;
+    }
+
+    .scroll-indicator::after {
+      content: "";
+      display: block;
+      width: calc(var(--scroll-progress) * 100%);
+      height: 100%;
+      background: linear-gradient(90deg, #84f8ff, #9ca8ff);
+    }
+
+    @supports (animation-timeline: scroll(self block)) {
+      .card-wrap {
+        animation: introReveal linear both;
+        animation-timeline: --shell-scroll;
+        animation-range: entry 0% entry 120%;
+      }
+
+      .stage[data-section] {
+        animation: sectionFade linear both;
+        animation-timeline: view(block);
+        animation-range: entry 0% cover 60%;
+      }
+    }
+
+    @keyframes introReveal {
+      from { opacity: 0.7; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes sectionFade {
+      from { opacity: 0.65; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .scroll-shell { scroll-behavior: auto; }
+      .card-wrap,
+      .stage[data-section] {
+        animation: none !important;
+        transform: none;
+        opacity: 1;
+        transition: none;
+      }
+      .scroll-indicator::after { transition: none; }
     }
 
     .content {
@@ -203,6 +331,8 @@
   </style>
 </head>
 <body>
+  <div class="scroll-indicator" aria-hidden="true"></div>
+  <div class="scroll-shell" id="scroll-shell">
   <div class="layout">
     <aside class="controls" id="controls">
       <h2>Metal Border Generator</h2>
@@ -251,7 +381,7 @@
       </div>
     </aside>
 
-    <main class="stage">
+    <main class="stage" data-section data-effect="intro">
       <div class="card-wrap" id="card">
         <div class="content">
           <div>
@@ -261,6 +391,19 @@
         </div>
       </div>
     </main>
+    <section class="stage" data-section data-effect="body">
+      <article class="spacer-copy">
+        <h2>Distance-first pacing windows</h2>
+        <p>The visual pacing in this demo is tied to dynamic viewport height windows instead of full-document percentage. That keeps reveal timing consistent whether the page is short or extremely long.</p>
+      </article>
+    </section>
+    <section class="stage" data-section data-effect="tail">
+      <article class="spacer-copy">
+        <h2>Fallback remains aligned</h2>
+        <p>When CSS scroll timelines are unavailable, JavaScript updates shared CSS variables for scroll distance, per-effect windows, and intersection-driven section progress while preserving native scrolling semantics.</p>
+      </article>
+    </section>
+  </div>
   </div>
 
 <script>
@@ -269,7 +412,7 @@ class MetalBorderPainter {
   static get inputProperties() {
     return [
       '--border-size','--radius','--bevel','--roughness','--texture-scale','--texture-strength',
-      '--light-angle','--light-elevation','--light-intensity',
+      '--light-angle','--light-elevation','--light-intensity','--specular-strength','--noise-strength',
       '--color1-r','--color1-g','--color1-b','--color1-a',
       '--color2-r','--color2-g','--color2-b','--color2-a',
       '--color3-r','--color3-g','--color3-b','--color3-a',
@@ -292,10 +435,10 @@ class MetalBorderPainter {
     const bevel = this.p(props,'--bevel',0.6);
     const rough = this.p(props,'--roughness',0.2);
     const texScale = Math.max(0.001, this.p(props,'--texture-scale',1));
-    const texStrength = this.p(props,'--texture-strength',0.3);
+    const texStrength = this.p(props,'--texture-strength',0.3) * this.p(props,'--noise-strength',1);
     const angle = this.p(props,'--light-angle',35) * (Math.PI/180);
     const elev = this.p(props,'--light-elevation',0.7);
-    const intensity = this.p(props,'--light-intensity',1);
+    const intensity = this.p(props,'--light-intensity',1) * this.p(props,'--specular-strength',1);
 
     const c1=this.rgba(props,1), c2=this.rgba(props,2), c3=this.rgba(props,3), c4=this.rgba(props,4);
 
@@ -365,27 +508,138 @@ registerPaint('metal-border', MetalBorderPainter);
 })();
 
 const root = document.documentElement;
+const scrollShell = document.getElementById('scroll-shell');
 const controls = document.querySelectorAll('[data-var]');
 const outputs = document.querySelectorAll('[data-out]');
+const sections = Array.from(document.querySelectorAll('[data-section]'));
+const reducedMotionQuery = matchMedia('(prefers-reduced-motion: reduce)');
 let manualLightAngle = 30;
+let rafId = 0;
+let readState = { y: 0, range: 1, vh: 1, now: performance.now() };
+let qualityTier = 'high';
+let frameBudget = 16;
+let frameCounter = 0;
+let lastTick = performance.now();
+let activeSections = new Set();
 
-function setVar(name, value){ root.style.setProperty(name, value); }
+const clamp01 = (v) => Math.max(0, Math.min(1, v));
+const setVar = (name, value) => root.style.setProperty(name, value);
+
 function initOutputs(){
-  outputs.forEach(out=>{
+  outputs.forEach((out) => {
     const key = out.dataset.out;
     out.textContent = getComputedStyle(root).getPropertyValue(key).trim();
   });
 }
 
-controls.forEach(el => {
+function pickQualityTier() {
+  const memory = navigator.deviceMemory || 8;
+  const cores = navigator.hardwareConcurrency || 8;
+  if (memory <= 2 || cores <= 2 || frameBudget > 26) return 'low';
+  if (memory <= 4 || cores <= 4 || frameBudget > 19) return 'medium';
+  return 'high';
+}
+
+function getWindowPx(dvhUnits, pxCap, vhPx) {
+  return Math.max(1, Math.min(dvhUnits * vhPx, pxCap));
+}
+
+function updateMetricsRead() {
+  const y = scrollShell.scrollTop;
+  const range = Math.max(1, scrollShell.scrollHeight - scrollShell.clientHeight);
+  const vh = Math.max(1, scrollShell.clientHeight / 100);
+  readState = { y, range, vh, now: performance.now() };
+}
+
+function updateEffectsWrite() {
+  const { y, range, vh, now } = readState;
+  const reduced = reducedMotionQuery.matches;
+  const globalProgress = clamp01(y / range);
+
+  const introStart = 0;
+  const introWindow = getWindowPx(120, 1400, vh);
+  const lightStart = getWindowPx(18, 360, vh);
+  const lightWindow = getWindowPx(180, 1800, vh);
+
+  const introProgress = reduced ? 1 : clamp01((y - introStart) / introWindow);
+  const lightProgress = reduced ? 0 : clamp01((y - lightStart) / lightWindow);
+
+  const drive = parseFloat(getComputedStyle(root).getPropertyValue('--scroll-drive')) || 1;
+  const azimuth = reduced ? manualLightAngle : (manualLightAngle + lightProgress * 360 * drive) % 360;
+
+  frameCounter += 1;
+  if (frameCounter % 12 === 0) {
+    const delta = now - lastTick;
+    frameBudget = Math.max(8, delta / 12);
+    lastTick = now;
+    qualityTier = pickQualityTier();
+  }
+
+  const tierValues = qualityTier === 'low'
+    ? { tier: 0, spec: 0.65, noise: 0.18 }
+    : qualityTier === 'medium'
+      ? { tier: 0.5, spec: 0.85, noise: 0.26 }
+      : { tier: 1, spec: 1, noise: 0.35 };
+
+  setVar('--scroll-y-px', y.toFixed(2));
+  setVar('--scroll-range-px', range.toFixed(2));
+  setVar('--scroll-progress', globalProgress.toFixed(4));
+  setVar('--vh-px', vh.toFixed(4));
+  setVar('--intro-start-px', introStart.toFixed(2));
+  setVar('--intro-window-px', introWindow.toFixed(2));
+  setVar('--intro-progress', introProgress.toFixed(4));
+  setVar('--light-start-px', lightStart.toFixed(2));
+  setVar('--light-window-px', lightWindow.toFixed(2));
+  setVar('--light-progress', lightProgress.toFixed(4));
+  setVar('--light-azimuth', azimuth.toFixed(2));
+  setVar('--light-angle', azimuth.toFixed(2));
+  setVar('--quality-tier', tierValues.tier);
+  setVar('--specular-strength', tierValues.spec);
+  setVar('--noise-strength', tierValues.noise);
+
+  const lightOut = document.querySelector('[data-out="--light-angle"]');
+  if (lightOut) lightOut.textContent = azimuth.toFixed(2);
+
+  const ioSections = activeSections.size ? activeSections : new Set(sections);
+  ioSections.forEach((section) => {
+    const rect = section.getBoundingClientRect();
+    const localWindow = Math.max(1, getWindowPx(90, 1000, vh));
+    const localProgress = reduced ? 1 : clamp01((vh * 45 - rect.top) / localWindow);
+    section.style.setProperty('--section-progress', localProgress.toFixed(4));
+  });
+}
+
+function scheduleUpdate() {
+  if (rafId) return;
+  rafId = requestAnimationFrame(() => {
+    rafId = 0;
+    updateMetricsRead();
+    updateEffectsWrite();
+  });
+}
+
+const sectionObserver = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (entry.isIntersecting) {
+      activeSections.add(entry.target);
+    } else {
+      activeSections.delete(entry.target);
+    }
+  });
+  scheduleUpdate();
+}, { root: scrollShell, threshold: [0, 0.2, 0.6, 1] });
+sections.forEach((section) => sectionObserver.observe(section));
+
+controls.forEach((el) => {
   const key = el.dataset.var;
   const update = () => {
     if (key === '--light-angle') manualLightAngle = parseFloat(el.value) || 0;
     setVar(key, el.value);
     const out = document.querySelector(`[data-out="${key}"]`);
     if (out) out.textContent = el.value;
+    scheduleUpdate();
   };
-  el.addEventListener('input', update, {passive:true});
+  el.addEventListener('input', update, { passive: true });
   update();
 });
 
@@ -432,23 +686,12 @@ innerShadowColor.addEventListener('input', () => applyShadowColor(innerShadowCol
 applyShadowColor(outerShadowColor, 'outer-shadow');
 applyShadowColor(innerShadowColor, 'inner-shadow');
 
-let ticking = false;
-function onScroll(){
-  if (ticking) return;
-  ticking = true;
-  requestAnimationFrame(() => {
-    const max = document.documentElement.scrollHeight - innerHeight;
-    const progress = max > 0 ? scrollY / max : 0;
-    const drive = parseFloat(getComputedStyle(root).getPropertyValue('--scroll-drive')) || 1;
-    const base = manualLightAngle;
-    setVar('--light-angle', ((base + progress*360*drive)%360).toFixed(2));
-    const out = document.querySelector('[data-out="--light-angle"]');
-    if (out) out.textContent = getComputedStyle(root).getPropertyValue('--light-angle').trim();
-    ticking = false;
-  });
-}
-addEventListener('scroll', onScroll, {passive:true});
+scrollShell.addEventListener('scroll', scheduleUpdate, { passive: true });
+addEventListener('resize', scheduleUpdate, { passive: true });
+reducedMotionQuery.addEventListener('change', scheduleUpdate);
+
 initOutputs();
+scheduleUpdate();
 </script>
 </body>
 </html>
