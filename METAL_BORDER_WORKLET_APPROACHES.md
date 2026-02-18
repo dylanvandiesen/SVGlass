@@ -132,7 +132,8 @@ If you want, I can next provide a **reference implementation skeleton** (CSS + J
 ## Implementation plan: scroll-container + viewport triggers with JS fallback/perf layer
 
 ### 0) Goals and constraints
-- Build a **scroll container driven experience** where visual response is based on normalized progress (`0..1`).
+- Build a **scroll container driven experience** where visual response is based primarily on **distance units** (pixels/viewport lengths), not only whole-page percentages.
+- Derive normalized progress (`0..1`) only as a secondary abstraction for effects that actually need it.
 - Use **CSS-first features** when available (scroll timelines, view timelines, typed custom properties).
 - Add **JavaScript fallback** when features are missing and for performance tuning on lower-end devices.
 
@@ -148,24 +149,33 @@ If you want, I can next provide a **reference implementation skeleton** (CSS + J
 - Keep all mode switching centralized in one bootstrap module.
 
 ### 2) Core CSS architecture (works in every mode)
-- Define stable visual contract with variables:
-  - `--scroll-progress` (`0..1`),
-  - `--section-progress` (`0..1` per element),
+- Define stable visual contract with both **distance** and **normalized** variables:
+  - `--scroll-y-px` (absolute scrollTop in px),
+  - `--scroll-range-px` (max scroll distance),
+  - `--vh-px` (runtime viewport height in px, optional),
+  - `--scroll-progress` (`0..1`, derived),
+  - `--section-progress` (`0..1` per element, derived),
   - `--light-azimuth`, `--spec-intensity`, etc.
+- Drive major effect distances from px/vh (`calc(var(--scroll-y-px) * k)`, `clamp()` windows) so behavior is stable on long pages.
 - Register typed variables via `@property` where supported.
 - Ensure effects degrade gracefully if variables are static.
 
 ### 3) Native CSS path (`native-css`)
 - Use `animation-timeline: scroll(self block)` for container-level progress.
 - Use `animation-timeline: view(block)` (or equivalent) on child elements for viewport triggers.
-- Map timeline progress into visual variables via keyframes.
+- Prefer **finite distance windows** for key interactions (e.g. animate over first `120vh` or next `800px`) instead of mapping the entire document scroll to one effect.
+- Map timeline progress into visual variables via keyframes, but cap/saturate with `clamp()` so very tall pages do not make effects feel too fast or too compressed.
 - Add container-query based tuning for density/size breakpoints (`@container`) but do not rely on it for metric extraction.
 
 ### 4) JS fallback path (`hybrid-js` and `js-fallback`)
-- Container progress:
+- Container metrics:
   - Listen to container `scroll` (passive listener).
-  - Compute `progress = scrollTop / (scrollHeight - clientHeight)`; clamp to `[0,1]`.
-  - Write `--scroll-progress` on the container/root.
+  - Read and write `--scroll-y-px` and `--scroll-range-px`.
+  - Compute normalized `progress = scrollTop / (scrollHeight - clientHeight)` only for effects that need a `0..1` value.
+- Distance-first mapping strategy:
+  - Define effect windows in px/vh (example: `introWindow = min(120 * vh, 1400px)`).
+  - Compute per-effect progress as `effectP = clamp(scrollY / introWindow, 0, 1)`.
+  - This avoids whole-page-percentage coupling that can feel inconsistent across very short vs very long pages.
 - Element viewport triggers:
   - Use `IntersectionObserver` with scoped `root` equal to the scroll container.
   - For stepped triggers: threshold array (e.g. `[0, .25, .5, .75, 1]`).
@@ -196,13 +206,15 @@ If you want, I can next provide a **reference implementation skeleton** (CSS + J
 
 ### 7) Testing and verification plan
 - Functional checks:
-  - progress reaches exactly `0` at top and `1` at end.
+  - distance-driven effects complete over intended windows (e.g. first `120vh`) regardless of total page length.
+  - normalized progress reaches exactly `0` at top and `1` at end when used.
   - viewport triggers fire consistently entering/leaving.
 - Compatibility checks:
   - one browser with full timeline support,
   - one browser on JS fallback path.
 - Performance checks:
   - verify frame time under continuous scroll in sample long page.
+  - test both short and very long pages to ensure pacing is consistent.
   - confirm no layout thrash (read/write separation).
 
 ### 8) Rollout plan
@@ -219,3 +231,8 @@ If you want, I can next provide a **reference implementation skeleton** (CSS + J
 5. Add native timeline CSS path.
 6. Add performance tiering and reduced-motion refinements.
 7. Validate and document support matrix.
+
+### 10) Practical recommendation on units (answer to pacing concern)
+- Yes: for most scroll UX, **base timing on px/vh distance windows** first.
+- Use global percentage only for document-wide indicators (progress bar, chapter index).
+- For interaction animations, prefer **local progress from fixed windows** so users get predictable pacing independent of page length.
