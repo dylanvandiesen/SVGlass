@@ -12,14 +12,26 @@
       --roughness: 0.25;
       --texture-scale: 1.2;
       --texture-strength: 0.35;
+      --texture-strength-effective: var(--texture-strength);
       --color1-r: 230; --color1-g: 235; --color1-b: 245; --color1-a: 0.95;
       --color2-r: 140; --color2-g: 150; --color2-b: 170; --color2-a: 0.9;
       --color3-r: 70; --color3-g: 78; --color3-b: 96; --color3-a: 0.88;
       --color4-r: 250; --color4-g: 252; --color4-b: 255; --color4-a: 0.5;
-      --light-angle: 30;
+      --manual-light-angle: 30;
+      --light-azimuth: 0;
+      --light-angle: calc(var(--manual-light-angle) + var(--light-azimuth));
       --light-elevation: 0.75;
       --light-intensity: 1;
       --scroll-drive: 1;
+
+      --scroll-y-px: 0;
+      --scroll-range-px: 1;
+      --scroll-progress: 0;
+      --vh-px: 1;
+      --intro-progress: 0;
+      --detail-progress: 0;
+      --section-progress: 0;
+
       --inner-shadow-x: 0;
       --inner-shadow-y: 2;
       --inner-shadow-blur: 16;
@@ -29,7 +41,6 @@
       --outer-shadow-y: 8;
       --outer-shadow-blur: 24;
       --outer-shadow-r: 0; --outer-shadow-g: 0; --outer-shadow-b: 0; --outer-shadow-a: 0.45;
-      --panel-bg-a: 0.22;
       --fill-a: 0.04;
       --mix-blend: normal;
       --filter-brightness: 1;
@@ -40,20 +51,27 @@
       --filter-blur: 0;
     }
 
-    @property --light-angle {
-      syntax: "<number>";
-      inherits: true;
-      initial-value: 30;
-    }
+    @property --manual-light-angle { syntax: "<number>"; inherits: true; initial-value: 30; }
+    @property --light-azimuth { syntax: "<number>"; inherits: true; initial-value: 0; }
+    @property --scroll-progress { syntax: "<number>"; inherits: true; initial-value: 0; }
+    @property --intro-progress { syntax: "<number>"; inherits: true; initial-value: 0; }
+    @property --detail-progress { syntax: "<number>"; inherits: true; initial-value: 0; }
+    @property --section-progress { syntax: "<number>"; inherits: true; initial-value: 0; }
 
     * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; }
     body {
-      margin: 0;
       font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
       color: #eff4ff;
-      background:
-        radial-gradient(circle at 20% 10%, #3a4056 0%, #1b1d28 42%, #0f1118 100%);
-      min-height: 250vh;
+      background: radial-gradient(circle at 20% 10%, #3a4056 0%, #1b1d28 42%, #0f1118 100%);
+    }
+
+    .app-scroll {
+      height: 100dvh;
+      overflow-y: auto;
+      overscroll-behavior-y: contain;
+      scroll-behavior: smooth;
+      container-type: inline-size;
     }
 
     .layout {
@@ -62,12 +80,13 @@
       gap: 1.2rem;
       padding: 1rem;
       align-items: start;
+      min-height: 320dvh;
     }
 
     .controls {
       position: sticky;
       top: 0.5rem;
-      max-height: calc(100vh - 1rem);
+      max-height: calc(100dvh - 1rem);
       overflow: auto;
       background: rgba(18, 21, 31, 0.82);
       backdrop-filter: blur(8px);
@@ -76,67 +95,40 @@
       padding: 0.9rem;
     }
 
-    .controls h2 {
-      margin: 0 0 0.3rem;
-      font-size: 1.1rem;
-    }
-
-    .controls p {
-      margin: 0 0 0.8rem;
-      opacity: 0.8;
-      font-size: 0.85rem;
-    }
-
-    .group {
-      border-top: 1px solid rgba(255,255,255,0.12);
-      padding-top: 0.7rem;
-      margin-top: 0.7rem;
-    }
-
-    .group h3 {
-      margin: 0 0 0.45rem;
-      font-size: 0.88rem;
-      opacity: 0.92;
-      letter-spacing: 0.02em;
-    }
-
-    label {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 0.5rem;
-      align-items: center;
-      font-size: 0.8rem;
-      margin-bottom: 0.45rem;
-    }
-
-    input[type="range"], select, input[type="color"] {
-      width: 100%;
-      margin-top: 0.2rem;
-    }
-
-    input[type="color"] {
-      height: 38px;
-      border: none;
-      border-radius: 8px;
-      background: transparent;
-      padding: 0;
-    }
-
+    .controls h2 { margin: 0 0 0.3rem; font-size: 1.1rem; }
+    .controls p { margin: 0 0 0.8rem; opacity: 0.8; font-size: 0.85rem; }
+    .group { border-top: 1px solid rgba(255,255,255,0.12); padding-top: 0.7rem; margin-top: 0.7rem; }
+    .group h3 { margin: 0 0 0.45rem; font-size: 0.88rem; opacity: 0.92; letter-spacing: 0.02em; }
+    label { display: grid; grid-template-columns: 1fr auto; gap: 0.5rem; align-items: center; font-size: 0.8rem; margin-bottom: 0.45rem; }
+    input[type="range"], select, input[type="color"] { width: 100%; margin-top: 0.2rem; }
+    input[type="color"] { height: 38px; border: none; border-radius: 8px; background: transparent; padding: 0; }
     .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
 
     .stage {
       display: grid;
-      place-items: center;
-      min-height: 92vh;
+      gap: 20dvh;
+      align-content: start;
+      min-height: 300dvh;
       padding: 1.2rem;
+      contain: layout paint;
+    }
+
+    .scene {
+      min-height: 92dvh;
+      display: grid;
+      place-items: center;
+      opacity: calc(0.65 + (var(--section-progress) * 0.35));
+      transform: translateY(calc((1 - var(--section-progress)) * 10px));
+      transition: opacity 220ms ease;
     }
 
     .card-wrap {
       position: relative;
       width: min(92vw, 820px);
-      min-height: min(58vh, 480px);
+      min-height: min(58dvh, 480px);
       border-radius: calc(var(--radius) * 1px);
       isolation: isolate;
+      will-change: transform;
       filter:
         brightness(var(--filter-brightness))
         contrast(var(--filter-contrast))
@@ -144,6 +136,7 @@
         hue-rotate(calc(var(--filter-hue) * 1deg))
         sepia(var(--filter-sepia))
         blur(calc(var(--filter-blur) * 1px));
+      transform: translateY(calc((0.5 - var(--intro-progress)) * 24px));
     }
 
     .card-wrap::before,
@@ -187,6 +180,66 @@
     .content h1 { margin: 0; font-size: clamp(1.4rem, 3vw, 2.4rem); }
     .content p { max-width: 40ch; opacity: 0.87; }
 
+    .status-chip {
+      position: absolute;
+      right: 1rem;
+      bottom: 1rem;
+      border: 1px solid rgba(255,255,255,0.25);
+      background: rgba(10, 14, 22, 0.65);
+      border-radius: 999px;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.78rem;
+      backdrop-filter: blur(6px);
+    }
+
+    .story-panel {
+      width: min(90vw, 720px);
+      padding: 1.2rem;
+      border-radius: 16px;
+      background: rgba(13, 16, 24, 0.5);
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    @supports (animation-timeline: scroll(self block)) {
+      .app-scroll {
+        scroll-timeline-name: --app-timeline;
+        scroll-timeline-axis: block;
+      }
+
+      .card-wrap {
+        animation: lightSweep linear both;
+        animation-timeline: --app-timeline;
+        animation-range: 0% 34%;
+      }
+
+      .scene {
+        view-timeline-name: --scene-view;
+        view-timeline-axis: block;
+      }
+
+      .story-panel {
+        animation: panelReveal linear both;
+        animation-timeline: --scene-view;
+        animation-range: entry 5% cover 55%;
+      }
+    }
+
+    @keyframes lightSweep {
+      from { --light-azimuth: 0; --intro-progress: 0; }
+      to { --light-azimuth: calc(360 * var(--scroll-drive)); --intro-progress: 1; }
+    }
+
+    @keyframes panelReveal {
+      from { opacity: 0.35; transform: translateY(30px) scale(0.985); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .app-scroll { scroll-behavior: auto; }
+      .scene, .card-wrap, .story-panel { transition: none; animation: none !important; transform: none !important; }
+      :root { --light-azimuth: 0; --intro-progress: 1; --detail-progress: 1; --section-progress: 1; }
+    }
+
     @media (max-width: 900px) {
       .layout { grid-template-columns: 1fr; }
       .controls {
@@ -195,72 +248,91 @@
         bottom: 0;
         left: 0.6rem;
         right: 0.6rem;
-        max-height: 42vh;
+        max-height: 42dvh;
         z-index: 10;
       }
-      .stage { padding-bottom: 44vh; }
+      .stage { padding-bottom: 44dvh; }
     }
   </style>
 </head>
 <body>
-  <div class="layout">
-    <aside class="controls" id="controls">
-      <h2>Metal Border Generator</h2>
-      <p>Scroll page to animate light. Touch-friendly controls below.</p>
+  <div class="app-scroll" id="scroll-root">
+    <div class="layout">
+      <aside class="controls" id="controls">
+        <h2>Metal Border Generator</h2>
+        <p>Scroll container uses <code>dvh</code>-paced windows with CSS timelines first and JS fallback.</p>
 
-      <div class="group">
-        <h3>Geometry + Light</h3>
-        <label>Border size <output data-out="--border-size"></output><input data-var="--border-size" type="range" min="4" max="64" step="1" value="24"></label>
-        <label>Radius <output data-out="--radius"></output><input data-var="--radius" type="range" min="0" max="80" step="1" value="28"></label>
-        <label>Bevel <output data-out="--bevel"></output><input data-var="--bevel" type="range" min="0" max="1" step="0.01" value="0.65"></label>
-        <label>Light angle <output data-out="--light-angle"></output><input data-var="--light-angle" type="range" min="0" max="360" step="1" value="30"></label>
-        <label>Light elevation <output data-out="--light-elevation"></output><input data-var="--light-elevation" type="range" min="0" max="1" step="0.01" value="0.75"></label>
-        <label>Light intensity <output data-out="--light-intensity"></output><input data-var="--light-intensity" type="range" min="0" max="2" step="0.01" value="1"></label>
-        <label>Scroll drive <output data-out="--scroll-drive"></output><input data-var="--scroll-drive" type="range" min="0" max="2" step="0.01" value="1"></label>
-      </div>
-
-      <div class="group">
-        <h3>Texture + Blend</h3>
-        <label>Roughness <output data-out="--roughness"></output><input data-var="--roughness" type="range" min="0" max="1" step="0.01" value="0.25"></label>
-        <label>Texture scale <output data-out="--texture-scale"></output><input data-var="--texture-scale" type="range" min="0.4" max="8" step="0.01" value="1.2"></label>
-        <label>Texture strength <output data-out="--texture-strength"></output><input data-var="--texture-strength" type="range" min="0" max="1" step="0.01" value="0.35"></label>
-        <label>Blend mode
-          <select data-var="--mix-blend">
-            <option>normal</option><option>overlay</option><option>screen</option><option>multiply</option>
-            <option>soft-light</option><option>hard-light</option><option>luminosity</option><option>difference</option>
-          </select>
-        </label>
-      </div>
-
-      <div class="group"><h3>Colors (+ alpha per stop)</h3><div id="color-controls"></div></div>
-
-      <div class="group">
-        <h3>Shadows + Filters</h3>
-        <label>Outer shadow color <input type="color" id="outer-shadow-color" value="#000000"></label>
-        <label>Outer blur <output data-out="--outer-shadow-blur"></output><input data-var="--outer-shadow-blur" type="range" min="0" max="80" step="1" value="24"></label>
-        <label>Outer alpha <output data-out="--outer-shadow-a"></output><input data-var="--outer-shadow-a" type="range" min="0" max="1" step="0.01" value="0.45"></label>
-        <label>Inner shadow color <input type="color" id="inner-shadow-color" value="#0a0c12"></label>
-        <label>Inner blur <output data-out="--inner-shadow-blur"></output><input data-var="--inner-shadow-blur" type="range" min="0" max="50" step="1" value="16"></label>
-        <label>Inner alpha <output data-out="--inner-shadow-a"></output><input data-var="--inner-shadow-a" type="range" min="0" max="1" step="0.01" value="0.6"></label>
-        <label>Brightness <output data-out="--filter-brightness"></output><input data-var="--filter-brightness" type="range" min="0.4" max="2" step="0.01" value="1"></label>
-        <label>Contrast <output data-out="--filter-contrast"></output><input data-var="--filter-contrast" type="range" min="0.5" max="2.5" step="0.01" value="1.05"></label>
-        <label>Saturate <output data-out="--filter-saturate"></output><input data-var="--filter-saturate" type="range" min="0" max="3" step="0.01" value="1.12"></label>
-        <label>Hue rotate <output data-out="--filter-hue"></output><input data-var="--filter-hue" type="range" min="0" max="360" step="1" value="0"></label>
-        <label>Sepia <output data-out="--filter-sepia"></output><input data-var="--filter-sepia" type="range" min="0" max="1" step="0.01" value="0"></label>
-        <label>Blur <output data-out="--filter-blur"></output><input data-var="--filter-blur" type="range" min="0" max="5" step="0.1" value="0"></label>
-      </div>
-    </aside>
-
-    <main class="stage">
-      <div class="card-wrap" id="card">
-        <div class="content">
-          <div>
-            <h1>CSS Paint Metal Border</h1>
-            <p>Transparent center, inner and outer border shadows, conic-inspired metal lighting, texturing, blend modes, and scroll-driven light movement.</p>
-          </div>
+        <div class="group">
+          <h3>Geometry + Light</h3>
+          <label>Border size <output data-out="--border-size"></output><input data-var="--border-size" type="range" min="4" max="64" step="1" value="24"></label>
+          <label>Radius <output data-out="--radius"></output><input data-var="--radius" type="range" min="0" max="80" step="1" value="28"></label>
+          <label>Bevel <output data-out="--bevel"></output><input data-var="--bevel" type="range" min="0" max="1" step="0.01" value="0.65"></label>
+          <label>Base light angle <output data-out="--manual-light-angle"></output><input data-var="--manual-light-angle" type="range" min="0" max="360" step="1" value="30"></label>
+          <label>Light elevation <output data-out="--light-elevation"></output><input data-var="--light-elevation" type="range" min="0" max="1" step="0.01" value="0.75"></label>
+          <label>Light intensity <output data-out="--light-intensity"></output><input data-var="--light-intensity" type="range" min="0" max="2" step="0.01" value="1"></label>
+          <label>Scroll drive <output data-out="--scroll-drive"></output><input data-var="--scroll-drive" type="range" min="0" max="2" step="0.01" value="1"></label>
         </div>
-      </div>
-    </main>
+
+        <div class="group">
+          <h3>Texture + Blend</h3>
+          <label>Roughness <output data-out="--roughness"></output><input data-var="--roughness" type="range" min="0" max="1" step="0.01" value="0.25"></label>
+          <label>Texture scale <output data-out="--texture-scale"></output><input data-var="--texture-scale" type="range" min="0.4" max="8" step="0.01" value="1.2"></label>
+          <label>Texture strength <output data-out="--texture-strength"></output><input data-var="--texture-strength" type="range" min="0" max="1" step="0.01" value="0.35"></label>
+          <label>Blend mode
+            <select data-var="--mix-blend">
+              <option>normal</option><option>overlay</option><option>screen</option><option>multiply</option>
+              <option>soft-light</option><option>hard-light</option><option>luminosity</option><option>difference</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="group"><h3>Colors (+ alpha per stop)</h3><div id="color-controls"></div></div>
+
+        <div class="group">
+          <h3>Shadows + Filters</h3>
+          <label>Outer shadow color <input type="color" id="outer-shadow-color" value="#000000"></label>
+          <label>Outer blur <output data-out="--outer-shadow-blur"></output><input data-var="--outer-shadow-blur" type="range" min="0" max="80" step="1" value="24"></label>
+          <label>Outer alpha <output data-out="--outer-shadow-a"></output><input data-var="--outer-shadow-a" type="range" min="0" max="1" step="0.01" value="0.45"></label>
+          <label>Inner shadow color <input type="color" id="inner-shadow-color" value="#0a0c12"></label>
+          <label>Inner blur <output data-out="--inner-shadow-blur"></output><input data-var="--inner-shadow-blur" type="range" min="0" max="50" step="1" value="16"></label>
+          <label>Inner alpha <output data-out="--inner-shadow-a"></output><input data-var="--inner-shadow-a" type="range" min="0" max="1" step="0.01" value="0.6"></label>
+          <label>Brightness <output data-out="--filter-brightness"></output><input data-var="--filter-brightness" type="range" min="0.4" max="2" step="0.01" value="1"></label>
+          <label>Contrast <output data-out="--filter-contrast"></output><input data-var="--filter-contrast" type="range" min="0.5" max="2.5" step="0.01" value="1.05"></label>
+          <label>Saturate <output data-out="--filter-saturate"></output><input data-var="--filter-saturate" type="range" min="0" max="3" step="0.01" value="1.12"></label>
+          <label>Hue rotate <output data-out="--filter-hue"></output><input data-var="--filter-hue" type="range" min="0" max="360" step="1" value="0"></label>
+          <label>Sepia <output data-out="--filter-sepia"></output><input data-var="--filter-sepia" type="range" min="0" max="1" step="0.01" value="0"></label>
+          <label>Blur <output data-out="--filter-blur"></output><input data-var="--filter-blur" type="range" min="0" max="5" step="0.1" value="0"></label>
+        </div>
+      </aside>
+
+      <main class="stage">
+        <section class="scene observe-section">
+          <div class="card-wrap js-continuous" id="card">
+            <div class="content">
+              <div>
+                <h1>CSS Paint Metal Border</h1>
+                <p>Transparent center, inner and outer border shadows, conic-inspired metal lighting, texturing, blend modes, and dvh-paced scroll movement.</p>
+              </div>
+              <span class="status-chip" id="quality-chip">quality: high</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="scene observe-section">
+          <article class="story-panel js-continuous">
+            <h2>dvh pacing window</h2>
+            <p>Intro effect uses <code>min(120dvh, 1400px)</code> and detail effect uses <code>min(160dvh, 1800px)</code>. This keeps timing consistent for short and long documents.</p>
+          </article>
+        </section>
+
+        <section class="scene observe-section">
+          <article class="story-panel">
+            <h2>Accessibility baseline</h2>
+            <p>Reduced motion freezes scroll-coupled transforms while preserving readable static states and native scrolling semantics.</p>
+          </article>
+        </section>
+      </main>
+    </div>
   </div>
 
 <script>
@@ -268,7 +340,7 @@ const WORKLET = `
 class MetalBorderPainter {
   static get inputProperties() {
     return [
-      '--border-size','--radius','--bevel','--roughness','--texture-scale','--texture-strength',
+      '--border-size','--radius','--bevel','--roughness','--texture-scale','--texture-strength-effective',
       '--light-angle','--light-elevation','--light-intensity',
       '--color1-r','--color1-g','--color1-b','--color1-a',
       '--color2-r','--color2-g','--color2-b','--color2-a',
@@ -281,8 +353,6 @@ class MetalBorderPainter {
   rgba(props,i){
     return [this.p(props,'--color' + i + '-r',255),this.p(props,'--color' + i + '-g',255),this.p(props,'--color' + i + '-b',255),this.p(props,'--color' + i + '-a',1)];
   }
-  lerp(a,b,t){ return a + (b-a)*t; }
-  mix(c1,c2,t){ return [this.lerp(c1[0],c2[0],t),this.lerp(c1[1],c2[1],t),this.lerp(c1[2],c2[2],t),this.lerp(c1[3],c2[3],t)]; }
   hash(x,y){ return (Math.sin(x*127.1+y*311.7)*43758.5453123)%1; }
 
   paint(ctx, size, props) {
@@ -292,7 +362,7 @@ class MetalBorderPainter {
     const bevel = this.p(props,'--bevel',0.6);
     const rough = this.p(props,'--roughness',0.2);
     const texScale = Math.max(0.001, this.p(props,'--texture-scale',1));
-    const texStrength = this.p(props,'--texture-strength',0.3);
+    const texStrength = this.p(props,'--texture-strength-effective',0.3);
     const angle = this.p(props,'--light-angle',35) * (Math.PI/180);
     const elev = this.p(props,'--light-elevation',0.7);
     const intensity = this.p(props,'--light-intensity',1);
@@ -365,27 +435,40 @@ registerPaint('metal-border', MetalBorderPainter);
 })();
 
 const root = document.documentElement;
+const scrollRoot = document.getElementById('scroll-root');
+const qualityChip = document.getElementById('quality-chip');
 const controls = document.querySelectorAll('[data-var]');
 const outputs = document.querySelectorAll('[data-out]');
-let manualLightAngle = 30;
+const prefersReduced = matchMedia('(prefers-reduced-motion: reduce)');
+const supportsTimeline = CSS.supports('animation-timeline: scroll(self block)');
 
-function setVar(name, value){ root.style.setProperty(name, value); }
+const state = {
+  quality: 'high',
+  rafId: 0,
+  scrollDirty: true,
+  visibleElements: new Set(),
+  lastFrameAt: performance.now(),
+  frameBudgetAvg: 16.7,
+};
+
+const clamp01 = (v) => Math.min(1, Math.max(0, v));
+const setVar = (name, value) => root.style.setProperty(name, value);
+
 function initOutputs(){
-  outputs.forEach(out=>{
+  outputs.forEach((out) => {
     const key = out.dataset.out;
     out.textContent = getComputedStyle(root).getPropertyValue(key).trim();
   });
 }
 
-controls.forEach(el => {
+controls.forEach((el) => {
   const key = el.dataset.var;
   const update = () => {
-    if (key === '--light-angle') manualLightAngle = parseFloat(el.value) || 0;
     setVar(key, el.value);
     const out = document.querySelector(`[data-out="${key}"]`);
     if (out) out.textContent = el.value;
   };
-  el.addEventListener('input', update, {passive:true});
+  el.addEventListener('input', update, {passive: true});
   update();
 });
 
@@ -411,16 +494,16 @@ colorHost.addEventListener('input', (e) => {
   if (t.matches('[data-color]')) {
     const i = t.dataset.color;
     const {r,g,b} = hexToRgb(t.value);
-    setVar(`--color${i}-r`, r); setVar(`--color${i}-g`, g); setVar(`--color${i}-b`, b);
+    setVar(`--color${i}-r`, r);
+    setVar(`--color${i}-g`, g);
+    setVar(`--color${i}-b`, b);
   }
   if (t.matches('[data-alpha]')) setVar(`--color${t.dataset.alpha}-a`, t.value);
 });
-
 for (const el of colorHost.querySelectorAll('[data-color],[data-alpha]')) el.dispatchEvent(new Event('input'));
 
 const outerShadowColor = document.getElementById('outer-shadow-color');
 const innerShadowColor = document.getElementById('inner-shadow-color');
-
 function applyShadowColor(input, prefix){
   const {r,g,b} = hexToRgb(input.value);
   setVar(`--${prefix}-r`, r);
@@ -432,23 +515,128 @@ innerShadowColor.addEventListener('input', () => applyShadowColor(innerShadowCol
 applyShadowColor(outerShadowColor, 'outer-shadow');
 applyShadowColor(innerShadowColor, 'inner-shadow');
 
-let ticking = false;
-function onScroll(){
-  if (ticking) return;
-  ticking = true;
-  requestAnimationFrame(() => {
-    const max = document.documentElement.scrollHeight - innerHeight;
-    const progress = max > 0 ? scrollY / max : 0;
+function chooseQualityTier() {
+  const memory = navigator.deviceMemory ?? 8;
+  const cores = navigator.hardwareConcurrency ?? 8;
+  if (memory <= 4 || cores <= 4) return 'medium';
+  return 'high';
+}
+
+function applyQualityTier(tier) {
+  state.quality = tier;
+  document.body.dataset.quality = tier;
+  const texture = parseFloat(getComputedStyle(root).getPropertyValue('--texture-strength')) || 0.35;
+  const multiplier = tier === 'low' ? 0.45 : tier === 'medium' ? 0.72 : 1;
+  setVar('--texture-strength-effective', (texture * multiplier).toFixed(3));
+  qualityChip.textContent = `quality: ${tier}`;
+}
+
+function updateMetrics() {
+  const vh = Math.max(1, visualViewport?.height || window.innerHeight || 1);
+  const scrollY = scrollRoot.scrollTop;
+  const range = Math.max(1, scrollRoot.scrollHeight - scrollRoot.clientHeight);
+  const progress = clamp01(scrollY / range);
+
+  const introStart = 0;
+  const introWindow = Math.min(vh * 1.2, 1400);
+  const detailStart = introStart + introWindow * 0.55;
+  const detailWindow = Math.min(vh * 1.6, 1800);
+
+  const introProgress = clamp01((scrollY - introStart) / introWindow);
+  const detailProgress = clamp01((scrollY - detailStart) / detailWindow);
+
+  setVar('--vh-px', vh.toFixed(2));
+  setVar('--scroll-y-px', scrollY.toFixed(2));
+  setVar('--scroll-range-px', range.toFixed(2));
+  setVar('--scroll-progress', progress.toFixed(4));
+
+  if (!supportsTimeline) {
     const drive = parseFloat(getComputedStyle(root).getPropertyValue('--scroll-drive')) || 1;
-    const base = manualLightAngle;
-    setVar('--light-angle', ((base + progress*360*drive)%360).toFixed(2));
-    const out = document.querySelector('[data-out="--light-angle"]');
-    if (out) out.textContent = getComputedStyle(root).getPropertyValue('--light-angle').trim();
-    ticking = false;
+    setVar('--intro-progress', introProgress.toFixed(4));
+    setVar('--detail-progress', detailProgress.toFixed(4));
+    setVar('--light-azimuth', (introProgress * 360 * drive).toFixed(2));
+  }
+}
+
+function updateContinuousEffects(timestamp) {
+  const dt = timestamp - state.lastFrameAt;
+  state.lastFrameAt = timestamp;
+  state.frameBudgetAvg = state.frameBudgetAvg * 0.9 + dt * 0.1;
+
+  let nextTier = state.quality;
+  if (state.frameBudgetAvg > 26) nextTier = 'low';
+  else if (state.frameBudgetAvg > 20) nextTier = 'medium';
+  else if (state.frameBudgetAvg < 18) nextTier = chooseQualityTier();
+  if (nextTier !== state.quality) applyQualityTier(nextTier);
+
+  const introProgress = parseFloat(getComputedStyle(root).getPropertyValue('--intro-progress')) || 0;
+  const detailProgress = parseFloat(getComputedStyle(root).getPropertyValue('--detail-progress')) || 0;
+
+  state.visibleElements.forEach((el) => {
+    const drift = (0.5 - introProgress) * 14 + (detailProgress * 5);
+    el.style.transform = `translate3d(0, ${drift.toFixed(2)}px, 0)`;
+    el.style.opacity = (0.9 + detailProgress * 0.1).toFixed(3);
   });
 }
-addEventListener('scroll', onScroll, {passive:true});
+
+function frame(timestamp) {
+  state.rafId = 0;
+  if (prefersReduced.matches) {
+    setVar('--light-azimuth', 0);
+    setVar('--intro-progress', 1);
+    setVar('--detail-progress', 1);
+    return;
+  }
+
+  if (state.scrollDirty) {
+    updateMetrics();
+    state.scrollDirty = false;
+  }
+
+  if (!supportsTimeline || state.visibleElements.size) updateContinuousEffects(timestamp);
+}
+
+function requestFrame() {
+  if (!state.rafId) state.rafId = requestAnimationFrame(frame);
+}
+
+scrollRoot.addEventListener('scroll', () => {
+  state.scrollDirty = true;
+  requestFrame();
+}, {passive: true});
+
+window.addEventListener('resize', () => {
+  state.scrollDirty = true;
+  requestFrame();
+}, {passive: true});
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    const target = entry.target;
+    if (entry.isIntersecting) {
+      target.classList.add('is-visible');
+      setVar('--section-progress', Math.max(parseFloat(getComputedStyle(root).getPropertyValue('--section-progress')) || 0, 0.6).toFixed(3));
+      if (target.matches('.js-continuous')) state.visibleElements.add(target);
+    } else {
+      target.classList.remove('is-visible');
+      if (target.matches('.js-continuous')) state.visibleElements.delete(target);
+    }
+  });
+  if (!state.visibleElements.size) setVar('--section-progress', 0.25);
+  requestFrame();
+}, {root: scrollRoot, threshold: [0, 0.2, 0.6, 1]});
+
+document.querySelectorAll('.observe-section, .js-continuous').forEach((el) => observer.observe(el));
+
+prefersReduced.addEventListener('change', () => {
+  state.scrollDirty = true;
+  requestFrame();
+});
+
+applyQualityTier(chooseQualityTier());
 initOutputs();
+state.scrollDirty = true;
+requestFrame();
 </script>
 </body>
 </html>
