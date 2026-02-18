@@ -126,3 +126,96 @@ If you want, I can next provide a **reference implementation skeleton** (CSS + J
 - scroll-linked `--light-azimuth`,
 - inner+outer shadow composition,
 - reduced-motion fallback.
+
+---
+
+## Implementation plan: scroll-container + viewport triggers with JS fallback/perf layer
+
+### 0) Goals and constraints
+- Build a **scroll container driven experience** where visual response is based on normalized progress (`0..1`).
+- Use **CSS-first features** when available (scroll timelines, view timelines, typed custom properties).
+- Add **JavaScript fallback** when features are missing and for performance tuning on lower-end devices.
+
+### 1) Capability detection and mode selection
+- At startup, detect support for:
+  - `animation-timeline: scroll()` / `view()`.
+  - `@property` typed custom properties.
+  - CSS Paint API (`CSS.paintWorklet`).
+- Set a root mode flag (`data-scroll-mode`) with one of:
+  - `native-css` (full support),
+  - `hybrid-js` (partial support),
+  - `js-fallback` (minimal support).
+- Keep all mode switching centralized in one bootstrap module.
+
+### 2) Core CSS architecture (works in every mode)
+- Define stable visual contract with variables:
+  - `--scroll-progress` (`0..1`),
+  - `--section-progress` (`0..1` per element),
+  - `--light-azimuth`, `--spec-intensity`, etc.
+- Register typed variables via `@property` where supported.
+- Ensure effects degrade gracefully if variables are static.
+
+### 3) Native CSS path (`native-css`)
+- Use `animation-timeline: scroll(self block)` for container-level progress.
+- Use `animation-timeline: view(block)` (or equivalent) on child elements for viewport triggers.
+- Map timeline progress into visual variables via keyframes.
+- Add container-query based tuning for density/size breakpoints (`@container`) but do not rely on it for metric extraction.
+
+### 4) JS fallback path (`hybrid-js` and `js-fallback`)
+- Container progress:
+  - Listen to container `scroll` (passive listener).
+  - Compute `progress = scrollTop / (scrollHeight - clientHeight)`; clamp to `[0,1]`.
+  - Write `--scroll-progress` on the container/root.
+- Element viewport triggers:
+  - Use `IntersectionObserver` with scoped `root` equal to the scroll container.
+  - For stepped triggers: threshold array (e.g. `[0, .25, .5, .75, 1]`).
+  - For continuous effects: compute rect-based normalized value in an rAF loop only for visible elements.
+- Missing `@property` support:
+  - Continue writing numeric CSS variables; animation quality may reduce, but behavior remains correct.
+
+### 5) Performance enhancement layer
+- Use a single `requestAnimationFrame` scheduler that batches all reads then writes.
+- Avoid per-element scroll handlers; keep one container listener.
+- Apply visibility culling:
+  - Only update elements currently intersecting.
+  - Suspend heavy effects outside viewport range.
+- Add quality tiers (`high`, `medium`, `low`) based on:
+  - device memory / hardware concurrency hints,
+  - observed frame budget (simple moving average).
+- In `low` tier:
+  - reduce noise/detail,
+  - lower update frequency (e.g. every 2nd frame),
+  - disable nonessential secondary effects.
+
+### 6) Accessibility and UX safeguards
+- Respect `prefers-reduced-motion: reduce`:
+  - freeze scroll-linked light movement,
+  - keep static but readable visual state.
+- Maintain keyboard/assistive scrolling behavior (no scroll hijacking).
+- Ensure content remains functional with JS disabled (static styling baseline).
+
+### 7) Testing and verification plan
+- Functional checks:
+  - progress reaches exactly `0` at top and `1` at end.
+  - viewport triggers fire consistently entering/leaving.
+- Compatibility checks:
+  - one browser with full timeline support,
+  - one browser on JS fallback path.
+- Performance checks:
+  - verify frame time under continuous scroll in sample long page.
+  - confirm no layout thrash (read/write separation).
+
+### 8) Rollout plan
+- Phase 1: ship baseline static visuals + JS progress fallback.
+- Phase 2: enable native CSS scroll/view timelines behind feature detection.
+- Phase 3: enable paint worklet enhancements and quality tiers.
+- Phase 4: tune thresholds/curves from real telemetry.
+
+### 9) Suggested implementation order
+1. Build bootstrap capability detector + mode flags.
+2. Implement shared CSS variable contract.
+3. Implement JS scroll progress fallback.
+4. Implement `IntersectionObserver` viewport triggers.
+5. Add native timeline CSS path.
+6. Add performance tiering and reduced-motion refinements.
+7. Validate and document support matrix.
