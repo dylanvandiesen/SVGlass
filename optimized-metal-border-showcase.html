@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Optimized Dark Metal Border Showcase</title>
+  <style>
+    :root {
+      --bg-0: #0e1014;
+      --bg-1: #171b23;
+      --text: #e6ebf2;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { margin: 0; }
+
+    body {
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(90vmax 70vmax at 12% -20%, #242b39 0%, transparent 60%),
+        radial-gradient(70vmax 55vmax at 90% 120%, #1f2531 0%, transparent 68%),
+        linear-gradient(180deg, var(--bg-1), var(--bg-0));
+      line-height: 1.45;
+    }
+
+    .hero {
+      padding: clamp(2.4rem, 6vw, 5rem) 1rem 1rem;
+      text-align: center;
+    }
+
+    .hero h1 {
+      margin: 0 0 0.55rem;
+      letter-spacing: 0.01em;
+      font-size: clamp(1.7rem, 4.8vw, 3.2rem);
+    }
+
+    .hero p {
+      margin: 0 auto;
+      opacity: 0.86;
+      max-width: 62ch;
+    }
+
+    .stack {
+      width: min(1120px, 94vw);
+      margin: 0 auto;
+      display: grid;
+      gap: clamp(1rem, 2.2vw, 1.6rem);
+      padding: 1rem 0 clamp(3rem, 7vw, 5rem);
+    }
+
+    .metal-panel {
+      --ring: 18;
+      --radius: 24;
+      --mx: .5;
+      --my: .5;
+      --hover: .16;
+      --rough: .1;
+      position: relative;
+      border-radius: calc(var(--radius) * 1px);
+      min-height: clamp(180px, 24vh, 260px);
+      padding: clamp(1.1rem, 2.4vw, 1.8rem);
+      background: rgba(255, 255, 255, .02);
+      border: 1px solid rgba(255, 255, 255, .08);
+      overflow: clip;
+      content-visibility: auto;
+      contain-intrinsic-size: 280px;
+      box-shadow: 0 16px 40px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.05);
+      isolation: isolate;
+    }
+
+    .metal-panel::before,
+    .metal-panel::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+    }
+
+    .metal-panel::before {
+      background: paint(dark-metal-ring);
+      filter: saturate(1.04) contrast(1.06);
+    }
+
+    .metal-panel::after {
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.18),
+        inset 0 -16px 22px rgba(0,0,0,.34),
+        0 7px 14px rgba(0,0,0,.38);
+      opacity: .8;
+      mix-blend-mode: screen;
+    }
+
+    .metal-panel h2 { margin: 0 0 .4rem; font-size: clamp(1.1rem, 2.1vw, 1.5rem); }
+    .metal-panel p { margin: 0; max-width: 60ch; opacity: .9; }
+
+    .pill {
+      display: inline-block;
+      margin-top: .9rem;
+      font-size: .8rem;
+      padding: .25rem .55rem;
+      border-radius: 999px;
+      background: rgba(200, 214, 236, .13);
+      border: 1px solid rgba(220, 228, 248, .24);
+      color: #dce5f4;
+      letter-spacing: .02em;
+    }
+
+    .grid {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+
+    @supports not (background: paint(x)) {
+      .metal-panel::before {
+        background:
+          linear-gradient(155deg, rgba(245,248,255,.18), rgba(90,99,116,.24) 34%, rgba(44,51,66,.38) 68%, rgba(198,208,226,.2));
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .metal-panel { --hover: .08; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <h1>Optimized Diffused Metal Borders</h1>
+    <p>Paint Worklet + feathered mouse magnet highlight. Dark grey alloy look with bevel depth, conic specular response, and ultra-light micro noise.</p>
+  </header>
+
+  <main class="stack">
+    <section class="metal-panel"><h2>Mission Control</h2><p>Depth comes from a ring-only bevel and edge tone split, keeping center content clean while preserving the "wow" metallic sweep.</p><span class="pill">Paint API ring</span></section>
+    <section class="metal-panel"><h2>Thermal Routing</h2><p>A feathered pointer field modulates local light direction and intensity. Only a few variables update for stable performance.</p><span class="pill">Feathered magnet</span></section>
+
+    <div class="grid">
+      <section class="metal-panel"><h2>Inventory Core</h2><p>Conic response delivers specular movement while maintaining a dark, diffused metal tone.</p><span class="pill">Conic specular</span></section>
+      <section class="metal-panel"><h2>Signal Bridge</h2><p>Micro-noise is intentionally faint and quantized so texture feels real without heavy repaint cost.</p><span class="pill">Light noise</span></section>
+    </div>
+
+    <section class="metal-panel"><h2>Operations Deck</h2><p>Large card sizing demonstrates how to preserve richness while minimizing expensive full-surface effects.</p><span class="pill">Large container demo</span></section>
+    <section class="metal-panel"><h2>Telemetry Field</h2><p>Content-visibility and ring-only paint geometry reduce work during scroll and offscreen phases.</p><span class="pill">Scroll friendly</span></section>
+
+    <div class="grid">
+      <section class="metal-panel"><h2>Auxiliary Matrix</h2><p>Use this structure for repeating cards: simple markup, visual depth in pseudo-elements, and a single paint worklet path.</p><span class="pill">Simple markup</span></section>
+      <section class="metal-panel"><h2>Synthesis Bay</h2><p>Pair with reduced-motion and fallback gradients for resilient progressive enhancement.</p><span class="pill">Progressive enhancement</span></section>
+    </div>
+  </main>
+
+  <script>
+    const workletSource = `
+class DarkMetalRing {
+  static get inputProperties() {
+    return ['--ring','--radius','--mx','--my','--hover','--rough'];
+  }
+  n(props, name, d = 0) {
+    const v = parseFloat((props.get(name) || '').toString());
+    return Number.isFinite(v) ? v : d;
+  }
+  hash(x, y) {
+    const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453123;
+    return s - Math.floor(s);
+  }
+  paint(ctx, size, props) {
+    const w = size.width;
+    const h = size.height;
+    const ring = Math.max(4, this.n(props, '--ring', 16));
+    const radius = Math.max(0, this.n(props, '--radius', 18));
+    const mx = Math.min(1, Math.max(0, this.n(props, '--mx', .5)));
+    const my = Math.min(1, Math.max(0, this.n(props, '--my', .5)));
+    const hover = Math.min(1, Math.max(0, this.n(props, '--hover', .12)));
+    const rough = Math.min(.4, Math.max(0, this.n(props, '--rough', .1)));
+
+    const cx = w * mx;
+    const cy = h * my;
+    const angle = Math.atan2(cy - h * .5, cx - w * .5);
+
+    const outer = new Path2D();
+    outer.roundRect(0, 0, w, h, radius);
+    const innerR = Math.max(0, radius - ring * .48);
+    const inner = new Path2D();
+    inner.roundRect(ring, ring, Math.max(0, w - 2 * ring), Math.max(0, h - 2 * ring), innerR);
+
+    ctx.save();
+    ctx.clip(outer);
+    ctx.globalCompositeOperation = 'source-over';
+
+    const conic = ctx.createConicGradient(angle, w * .5, h * .5);
+    conic.addColorStop(0.00, 'rgba(226,231,240,.34)');
+    conic.addColorStop(0.18, 'rgba(122,132,150,.54)');
+    conic.addColorStop(0.50, 'rgba(48,55,70,.86)');
+    conic.addColorStop(0.84, 'rgba(154,166,186,.44)');
+    conic.addColorStop(1.00, 'rgba(226,231,240,.34)');
+    ctx.fillStyle = conic;
+    ctx.fillRect(0, 0, w, h);
+
+    const bevel = ctx.createLinearGradient(0, 0, w, h);
+    bevel.addColorStop(0, 'rgba(255,255,255,' + (0.05 + hover * 0.15) + ')');
+    bevel.addColorStop(.5, 'rgba(255,255,255,0)');
+    bevel.addColorStop(1, 'rgba(0,0,0,' + (0.24 + hover * 0.35) + ')');
+    ctx.fillStyle = bevel;
+    ctx.fillRect(0, 0, w, h);
+
+    const glow = ctx.createRadialGradient(cx, cy, ring * .3, cx, cy, Math.max(w, h) * 0.55);
+    glow.addColorStop(0, 'rgba(244,248,255,' + (0.06 + hover * 0.22) + ')');
+    glow.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fill(inner);
+    ctx.globalCompositeOperation = 'source-over';
+
+    const step = 16;
+    ctx.globalAlpha = 0.035 + rough * 0.2;
+    for (let y = 0; y < h; y += step) {
+      for (let x = 0; x < w; x += step) {
+        const v = this.hash((x / step) | 0, (y / step) | 0);
+        ctx.fillStyle = v > 0.5 ? '#fff' : '#000';
+        ctx.fillRect(x, y, step, step);
+      }
+    }
+    ctx.restore();
+  }
+}
+registerPaint('dark-metal-ring', DarkMetalRing);
+`;
+
+    if ('paintWorklet' in CSS) {
+      const blob = new Blob([workletSource], { type: 'text/javascript' });
+      CSS.paintWorklet.addModule(URL.createObjectURL(blob));
+    }
+
+    const panels = [...document.querySelectorAll('.metal-panel')];
+
+    function updatePanel(panel, clientX, clientY) {
+      const r = panel.getBoundingClientRect();
+      if (clientX < r.left - 120 || clientX > r.right + 120 || clientY < r.top - 120 || clientY > r.bottom + 120) {
+        panel.style.setProperty('--hover', '0.10');
+        return;
+      }
+      const x = (clientX - r.left) / r.width;
+      const y = (clientY - r.top) / r.height;
+      const dx = x - 0.5;
+      const dy = y - 0.5;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const feather = Math.max(0, 1 - dist / 0.7);
+      panel.style.setProperty('--mx', Math.min(1, Math.max(0, x)).toFixed(3));
+      panel.style.setProperty('--my', Math.min(1, Math.max(0, y)).toFixed(3));
+      panel.style.setProperty('--hover', (0.09 + feather * 0.45).toFixed(3));
+    }
+
+    let raf = 0;
+    let px = innerWidth * 0.5;
+    let py = innerHeight * 0.4;
+
+    function tick() {
+      raf = 0;
+      for (const panel of panels) updatePanel(panel, px, py);
+    }
+
+    addEventListener('pointermove', (e) => {
+      px = e.clientX;
+      py = e.clientY;
+      if (!raf) raf = requestAnimationFrame(tick);
+    }, { passive: true });
+
+    addEventListener('scroll', () => {
+      if (!raf) raf = requestAnimationFrame(tick);
+    }, { passive: true });
+
+    tick();
+  </script>
+</body>
+</html>
