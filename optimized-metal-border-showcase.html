@@ -5,178 +5,85 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ultra Metal Border Showcase</title>
   <style>
-    :root {
-      --bg0: #0b0d11;
-      --bg1: #121722;
-      --text: #e5ebf4;
-    }
-
-    * { box-sizing: border-box; }
-    html, body { margin: 0; }
-
+    :root { --bg0:#0b0d11; --bg1:#121722; --text:#e5ebf4; }
+    * { box-sizing:border-box; }
+    html, body { margin:0; }
     body {
-      min-height: 100vh;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color: var(--text);
+      min-height:100vh;
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--text);
       background:
         radial-gradient(100vmax 65vmax at 10% -20%, #27314544 0%, transparent 65%),
         radial-gradient(90vmax 55vmax at 92% 115%, #2430443f 0%, transparent 67%),
         linear-gradient(180deg, var(--bg1), var(--bg0));
-      line-height: 1.45;
+      line-height:1.45;
     }
-
-    .hero {
-      text-align: center;
-      padding: clamp(2.4rem, 6vw, 4.8rem) 1.2rem 1.2rem;
-    }
-
-    .hero h1 { margin: 0 0 .5rem; font-size: clamp(1.7rem, 4.5vw, 3rem); }
-    .hero p { margin: 0 auto; max-width: 66ch; opacity: .9; }
-
-    .stack {
-      width: min(1120px, 94vw);
-      margin: 0 auto;
-      padding: .8rem 0 5rem;
-      display: grid;
-      gap: clamp(1rem, 2vw, 1.6rem);
-    }
-
-    .grid {
-      display: grid;
-      gap: 1rem;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+    .hero { text-align:center; padding:clamp(2.4rem,6vw,4.8rem) 1.2rem 1.2rem; }
+    .hero h1 { margin:0 0 .5rem; font-size:clamp(1.7rem,4.5vw,3rem); }
+    .hero p { margin:0 auto; max-width:66ch; opacity:.9; }
+    .stack { width:min(1120px,94vw); margin:0 auto; padding:.8rem 0 5rem; display:grid; gap:clamp(1rem,2vw,1.6rem); }
+    .grid { display:grid; gap:1rem; grid-template-columns:repeat(2,minmax(0,1fr)); }
 
     .metal-panel {
-      --ring: 16;
-      --radius: 24;
-      --mx: .5;
-      --my: .5;
-      --hover: .16;
-      --tone-boost: 1;
-      --rough: .08;
-      --c1: 222,229,240;
-      --c2: 144,154,170;
-      --c3: 56,63,77;
-      --c4: 186,196,214;
-      position: relative;
-      border-radius: calc(var(--radius) * 1px);
-      min-height: clamp(190px, 25vh, 280px);
-      padding: clamp(1.15rem, 2.6vw, 2rem);
-      overflow: clip;
-      content-visibility: auto;
-      contain-intrinsic-size: 320px;
-      background: transparent;
-      isolation: isolate;
+      --ring: 16; --radius:24; --mx:.5; --my:.5; --hover:.16; --tone-boost:1; --rough:.08;
+      --c1:222,229,240; --c2:144,154,170; --c3:56,63,77; --c4:186,196,214;
+      position:relative; border-radius:calc(var(--radius) * 1px); min-height:clamp(190px,25vh,280px);
+      padding:clamp(1.15rem,2.6vw,2rem); overflow:clip; content-visibility:auto; contain-intrinsic-size:320px;
+      background:transparent; isolation:isolate;
     }
-
-    .metal-panel::before,
+    .metal-panel::before,.metal-panel::after { content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; }
+    .metal-panel::before { background:paint(dark-metal-ring); z-index:0; }
     .metal-panel::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      pointer-events: none;
+      border:1px solid rgba(255,255,255,.18);
+      box-shadow:0 12px 24px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.22), inset 0 -1px 0 rgba(0,0,0,.35);
+      z-index:1; opacity:.95;
     }
-
-    .metal-panel::before {
-      background: paint(dark-metal-ring);
-      z-index: 0;
-    }
-
-    .metal-panel::after {
-      border: 1px solid rgba(255,255,255,.18);
-      box-shadow:
-        0 12px 24px rgba(0,0,0,.30),
-        inset 0 1px 0 rgba(255,255,255,.22),
-        inset 0 -1px 0 rgba(0,0,0,.35);
-      z-index: 1;
-      opacity: .95;
-    }
-
     .panel-content {
-      position: relative;
-      z-index: 2;
-      margin: calc(var(--ring) * 1px);
-      border-radius: calc((var(--radius) - var(--ring) * .45) * 1px);
-      padding: clamp(1rem, 2.5vw, 1.5rem);
-      background: transparent;
-      backdrop-filter: blur(1.2px);
+      position:relative; z-index:2; margin:calc(var(--ring) * 1px);
+      border-radius:calc((var(--radius) - var(--ring) * .45) * 1px);
+      padding:clamp(1rem,2.5vw,1.5rem);
+      background:transparent;
     }
+    .metal-panel h2 { margin:0 0 .4rem; font-size:clamp(1.06rem,2vw,1.46rem); }
+    .metal-panel p { margin:0; max-width:60ch; opacity:.9; }
+    .pill { display:inline-block; margin-top:.85rem; padding:.26rem .58rem; border-radius:999px; font-size:.78rem; background:rgba(210,220,238,.13); border:1px solid rgba(220,228,248,.25); }
 
-    .metal-panel h2 { margin: 0 0 .4rem; font-size: clamp(1.06rem, 2vw, 1.46rem); }
-    .metal-panel p { margin: 0; max-width: 60ch; opacity: .9; }
-
-    .pill {
-      display: inline-block;
-      margin-top: .85rem;
-      padding: .26rem .58rem;
-      border-radius: 999px;
-      font-size: .78rem;
-      background: rgba(210,220,238,.13);
-      border: 1px solid rgba(220,228,248,.25);
-    }
-
-    .v-thin { --ring: 10; --radius: 20; --rough: .07; }
-    .v-thick { --ring: 26; --radius: 34; --rough: .1; }
-    .v-cool { --c1: 222,232,245; --c2: 146,160,182; --c3: 48,58,78; --c4: 193,210,228; }
-    .v-warm { --c1: 236,226,214; --c2: 170,152,132; --c3: 72,61,52; --c4: 208,189,171; }
-    .v-dark { --c1: 197,207,220; --c2: 112,122,136; --c3: 32,37,46; --c4: 156,168,184; --tone-boost: .9; }
+    .v-thin { --ring:10; --radius:20; --rough:.07; }
+    .v-thick { --ring:26; --radius:34; --rough:.1; }
+    .v-cool { --c1:222,232,245; --c2:146,160,182; --c3:48,58,78; --c4:193,210,228; }
+    .v-warm { --c1:236,226,214; --c2:170,152,132; --c3:72,61,52; --c4:208,189,171; }
+    .v-dark { --c1:197,207,220; --c2:112,122,136; --c3:32,37,46; --c4:156,168,184; --tone-boost:.9; }
 
     @supports not (background: paint(x)) {
       .metal-panel::before {
-        background: linear-gradient(150deg,
-          rgba(244,247,255,.2),
-          rgba(118,129,146,.42) 30%,
-          rgba(44,52,66,.84) 67%,
-          rgba(197,205,220,.27));
+        background:linear-gradient(150deg, rgba(244,247,255,.2), rgba(118,129,146,.42) 30%, rgba(44,52,66,.84) 67%, rgba(197,205,220,.27));
       }
     }
-
-    @media (max-width: 860px) {
-      .grid { grid-template-columns: 1fr; }
+    @media (max-width:860px) { .grid { grid-template-columns:1fr; } }
+    @media (max-width:720px) {
+      .hero { padding-inline:1.2rem; }
+      .stack { width:min(1120px,96vw); padding:1.3rem 0 6.5rem; gap:1.25rem; }
+      .metal-panel { padding:1rem; min-height:210px; }
+      .panel-content { margin:calc(var(--ring) * 1px + 2px); padding:1rem; }
     }
-
-    @media (max-width: 720px) {
-      .hero { padding-inline: 1.2rem; }
-      .stack {
-        width: min(1120px, 96vw);
-        padding: 1.1rem 0 6.2rem;
-        gap: 1.2rem;
-      }
-      .metal-panel {
-        padding: 1rem;
-        min-height: 210px;
-      }
-      .panel-content {
-        margin: calc(var(--ring) * 1px + 2px);
-        padding: 1rem;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .metal-panel { --hover: .09; }
-    }
+    @media (prefers-reduced-motion: reduce) { .metal-panel { --hover:.09; } }
   </style>
 </head>
 <body>
   <header class="hero">
     <h1>Dark Diffused Metal Borders</h1>
-    <p>Ring-only Paint API metal borders with realistic bevel + specular response, very fine micro-noise, and a feathered pointer light that remains smooth on desktop and mobile.</p>
+    <p>Ring-only Paint API borders with realistic bevel/specular behavior and feathered pointer response. Center stays truly transparent.</p>
   </header>
 
   <main class="stack">
     <section class="metal-panel v-thick v-cool"><div class="panel-content"><h2>Mission Control</h2><p>Heavy border thickness for premium chassis styling and deep edge beveling.</p><span class="pill">Thick Cool Alloy</span></div></section>
     <section class="metal-panel v-thin v-dark"><div class="panel-content"><h2>Telemetry Relay</h2><p>Thin technical trim with darker steel tones and restrained highlights.</p><span class="pill">Thin Dark Steel</span></div></section>
-
     <div class="grid">
       <section class="metal-panel v-cool"><div class="panel-content"><h2>Signal Bridge</h2><p>Cool graphite with smooth conic sweep and subtle texture breakup.</p><span class="pill">Cool Graphite</span></div></section>
       <section class="metal-panel v-warm"><div class="panel-content"><h2>Foundry Node</h2><p>Warmer titanium blend for contrast while preserving dark diffused feel.</p><span class="pill">Warm Titanium</span></div></section>
     </div>
-
     <section class="metal-panel v-thick v-dark"><div class="panel-content"><h2>Operations Deck</h2><p>Large container variant: ring painting only, center remains transparent for glass/refraction layering.</p><span class="pill">Large Surface</span></div></section>
     <section class="metal-panel v-thin v-cool"><div class="panel-content"><h2>Navigation Fabric</h2><p>Balanced preset tuned for smooth pointer transitions and low repaint overhead.</p><span class="pill">Balanced Preset</span></div></section>
-
     <div class="grid">
       <section class="metal-panel v-warm v-thick"><div class="panel-content"><h2>Synthesis Bay</h2><p>Thicker warm metal frame with deep lowlights and polished top-edge glints.</p><span class="pill">Warm Thick</span></div></section>
       <section class="metal-panel v-dark"><div class="panel-content"><h2>Aperture Core</h2><p>Dark chromed framing designed for ambient UI and atmospheric backdrops.</p><span class="pill">Dark Chrome</span></div></section>
@@ -189,25 +96,15 @@ class DarkMetalRing {
   static get inputProperties() {
     return ['--ring','--radius','--mx','--my','--hover','--rough','--tone-boost','--c1','--c2','--c3','--c4'];
   }
-
-  num(props, n, d=0){
-    const v = parseFloat((props.get(n) || '').toString());
-    return Number.isFinite(v) ? v : d;
-  }
-
+  num(props, n, d=0){ const v = parseFloat((props.get(n)||'').toString()); return Number.isFinite(v) ? v : d; }
   rgb(props, n, d){
-    const raw = (props.get(n) || '').toString().trim();
+    const raw = (props.get(n)||'').toString().trim();
     const parts = raw.split(',').map(v => parseFloat(v.trim()));
     if (parts.length !== 3 || parts.some(v => !Number.isFinite(v))) return d;
     return parts;
   }
-
-  hash(x,y){
-    const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453123;
-    return s - Math.floor(s);
-  }
-
-  rgba(c, a){ return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')'; }
+  hash(x,y){ const s = Math.sin(x*127.1+y*311.7)*43758.5453123; return s - Math.floor(s); }
+  rgba(c,a){ return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')'; }
 
   paint(ctx, size, props) {
     const w = size.width, h = size.height;
@@ -218,31 +115,28 @@ class DarkMetalRing {
     const hover = Math.min(1, Math.max(0, this.num(props, '--hover', .14)));
     const rough = Math.min(.3, Math.max(0, this.num(props, '--rough', .08)));
     const tone = Math.min(1.2, Math.max(.75, this.num(props, '--tone-boost', 1)));
-
     const c1 = this.rgb(props, '--c1', [222,229,240]);
     const c2 = this.rgb(props, '--c2', [144,154,170]);
     const c3 = this.rgb(props, '--c3', [56,63,77]);
     const c4 = this.rgb(props, '--c4', [186,196,214]);
 
-    const cx = w * mx;
-    const cy = h * my;
+    const cx = w * mx, cy = h * my;
     const angle = Math.atan2(cy - h * .5, cx - w * .5);
 
-    const outer = new Path2D();
-    outer.roundRect(0, 0, w, h, radius);
-    const inner = new Path2D();
-    inner.roundRect(ring, ring, Math.max(0, w - ring*2), Math.max(0, h - ring*2), Math.max(0, radius - ring * .52));
+    const ringPath = new Path2D();
+    ringPath.roundRect(0, 0, w, h, radius);
+    ringPath.roundRect(ring, ring, Math.max(0, w - ring*2), Math.max(0, h - ring*2), Math.max(0, radius - ring * .52));
 
     ctx.save();
-    ctx.clip(outer);
+    ctx.clip(ringPath, 'evenodd');
 
-    const conic = ctx.createConicGradient(angle, w*.5, h*.5);
-    conic.addColorStop(0.00, this.rgba(c1, 0.28 * tone + hover * 0.09));
-    conic.addColorStop(0.18, this.rgba(c2, 0.52 * tone + hover * 0.08));
-    conic.addColorStop(0.52, this.rgba(c3, 0.88));
-    conic.addColorStop(0.82, this.rgba(c4, 0.44 * tone + hover * 0.07));
-    conic.addColorStop(1.00, this.rgba(c1, 0.28 * tone + hover * 0.09));
-    ctx.fillStyle = conic;
+    const baseConic = ctx.createConicGradient(angle, w*.5, h*.5);
+    baseConic.addColorStop(0.00, this.rgba(c1, 0.24 * tone + hover * 0.06));
+    baseConic.addColorStop(0.16, this.rgba(c2, 0.48 * tone + hover * 0.06));
+    baseConic.addColorStop(0.50, this.rgba(c3, 0.92));
+    baseConic.addColorStop(0.82, this.rgba(c4, 0.42 * tone + hover * 0.06));
+    baseConic.addColorStop(1.00, this.rgba(c1, 0.24 * tone + hover * 0.06));
+    ctx.fillStyle = baseConic;
     ctx.fillRect(0,0,w,h);
 
     const bevel = ctx.createLinearGradient(0, 0, w, h);
@@ -252,29 +146,46 @@ class DarkMetalRing {
     ctx.fillStyle = bevel;
     ctx.fillRect(0,0,w,h);
 
-    const rimTop = ctx.createLinearGradient(0, 0, 0, ring * 1.9);
-    rimTop.addColorStop(0, 'rgba(255,255,255,' + (0.16 + hover*0.22) + ')');
-    rimTop.addColorStop(1, 'rgba(255,255,255,0)');
-    ctx.fillStyle = rimTop;
-    ctx.fillRect(0,0,w,ring*2.1);
+    const mask = ctx.createRadialGradient(cx, cy, ring * 0.2, cx, cy, Math.max(w, h) * 0.44);
+    mask.addColorStop(0.00, 'rgba(255,255,255,' + (0.38 + hover * 0.45) + ')');
+    mask.addColorStop(0.55, 'rgba(255,255,255,' + (0.07 + hover * 0.08) + ')');
+    mask.addColorStop(1.00, 'rgba(255,255,255,0)');
 
-    const ringGlow = ctx.createRadialGradient(cx, cy, ring * .35, cx, cy, Math.max(w, h) * .46);
-    ringGlow.addColorStop(0, 'rgba(246,250,255,' + (0.06 + hover * 0.24) + ')');
-    ringGlow.addColorStop(0.7, 'rgba(240,246,255,0.03)');
+    const localSpec = ctx.createConicGradient(angle + 0.38, cx, cy);
+    localSpec.addColorStop(0.00, 'rgba(255,255,255,0.0)');
+    localSpec.addColorStop(0.10, 'rgba(255,255,255,' + (0.16 + hover * 0.28) + ')');
+    localSpec.addColorStop(0.20, 'rgba(255,255,255,0.02)');
+    localSpec.addColorStop(0.50, 'rgba(255,255,255,0.0)');
+    localSpec.addColorStop(0.78, 'rgba(255,255,255,' + (0.09 + hover * 0.18) + ')');
+    localSpec.addColorStop(0.90, 'rgba(255,255,255,0.0)');
+    localSpec.addColorStop(1.00, 'rgba(255,255,255,0.0)');
+    ctx.fillStyle = localSpec;
+    ctx.fillRect(0,0,w,h);
+
+    ctx.globalCompositeOperation = 'multiply';
+    ctx.fillStyle = mask;
+    ctx.fillRect(0,0,w,h);
+    ctx.globalCompositeOperation = 'source-over';
+
+    const ringGlow = ctx.createRadialGradient(cx, cy, ring * .35, cx, cy, Math.max(w, h) * .42);
+    ringGlow.addColorStop(0, 'rgba(246,250,255,' + (0.05 + hover * 0.20) + ')');
+    ringGlow.addColorStop(0.7, 'rgba(240,246,255,0.02)');
     ringGlow.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = ringGlow;
     ctx.fillRect(0,0,w,h);
 
-    ctx.globalCompositeOperation = 'destination-out';
-    ctx.fill(inner);
-    ctx.globalCompositeOperation = 'source-over';
+    const rimTop = ctx.createLinearGradient(0, 0, 0, ring * 1.9);
+    rimTop.addColorStop(0, 'rgba(255,255,255,' + (0.13 + hover*0.2) + ')');
+    rimTop.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = rimTop;
+    ctx.fillRect(0,0,w,ring*2.1);
 
     const step = 4;
-    const alphaBase = 0.008 + rough * 0.05;
+    const alphaBase = 0.006 + rough * 0.04;
     for (let y = 0; y < h; y += step) {
       for (let x = 0; x < w; x += step) {
         const n = this.hash((x/step)|0, (y/step)|0);
-        if (n > 0.88 || n < 0.12) {
+        if (n > 0.89 || n < 0.11) {
           const a = alphaBase * (0.4 + Math.abs(n - 0.5));
           ctx.fillStyle = n > 0.5 ? 'rgba(255,255,255,' + a + ')' : 'rgba(0,0,0,' + a + ')';
           ctx.fillRect(x, y, 1, 1);
@@ -294,37 +205,22 @@ registerPaint('dark-metal-ring', DarkMetalRing);
     }
 
     const panels = [...document.querySelectorAll('.metal-panel')];
-    const pointer = {
-      tx: innerWidth * 0.5,
-      ty: innerHeight * 0.45,
-      x: innerWidth * 0.5,
-      y: innerHeight * 0.45,
-      active: false
-    };
+    const pointer = { tx: innerWidth*0.5, ty: innerHeight*0.45, x: innerWidth*0.5, y: innerHeight*0.45, active: false };
 
-    function setTargets(x, y) {
-      pointer.tx = x;
-      pointer.ty = y;
-      pointer.active = true;
-      if (!rafId) rafId = requestAnimationFrame(animate);
-    }
+    function setTargets(x, y){ pointer.tx = x; pointer.ty = y; pointer.active = true; if (!rafId) rafId = requestAnimationFrame(animate); }
 
     function updatePanel(panel, px, py) {
       const r = panel.getBoundingClientRect();
       if (r.bottom < -120 || r.top > innerHeight + 120) return;
-
       const x = (px - r.left) / r.width;
       const y = (py - r.top) / r.height;
-      const clampedX = Math.min(1, Math.max(0, x));
-      const clampedY = Math.min(1, Math.max(0, y));
-
-      const dx = clampedX - .5;
-      const dy = clampedY - .5;
-      const dist = Math.sqrt(dx * dx + dy * dy);
+      const cx = Math.min(1, Math.max(0, x));
+      const cy = Math.min(1, Math.max(0, y));
+      const dx = cx - .5, dy = cy - .5;
+      const dist = Math.sqrt(dx*dx + dy*dy);
       const feather = Math.max(0, 1 - dist / .78);
-
-      panel.style.setProperty('--mx', clampedX.toFixed(3));
-      panel.style.setProperty('--my', clampedY.toFixed(3));
+      panel.style.setProperty('--mx', cx.toFixed(3));
+      panel.style.setProperty('--my', cy.toFixed(3));
       panel.style.setProperty('--hover', (0.08 + feather * 0.48).toFixed(3));
     }
 
@@ -333,27 +229,20 @@ registerPaint('dark-metal-ring', DarkMetalRing);
       rafId = 0;
       pointer.x += (pointer.tx - pointer.x) * 0.16;
       pointer.y += (pointer.ty - pointer.y) * 0.16;
-
       for (const p of panels) updatePanel(p, pointer.x, pointer.y);
-
       const moving = Math.abs(pointer.tx - pointer.x) + Math.abs(pointer.ty - pointer.y) > 0.5;
       if (moving || pointer.active) rafId = requestAnimationFrame(animate);
       if (!moving) pointer.active = false;
     }
 
-    addEventListener('pointerdown', (e) => setTargets(e.clientX, e.clientY), { passive: true });
+    addEventListener('pointerdown', (e) => setTargets(e.clientX, e.clientY), { passive:true });
     addEventListener('pointermove', (e) => {
-      if (e.pointerType === 'mouse' || e.pressure > 0 || e.buttons > 0) {
-        setTargets(e.clientX, e.clientY);
-      }
-    }, { passive: true });
+      if (e.pointerType === 'mouse' || e.pressure > 0 || e.buttons > 0) setTargets(e.clientX, e.clientY);
+    }, { passive:true });
+    addEventListener('scroll', () => { if (!rafId) rafId = requestAnimationFrame(animate); }, { passive:true });
+    addEventListener('resize', () => { if (!rafId) rafId = requestAnimationFrame(animate); }, { passive:true });
 
-    addEventListener('scroll', () => { if (!rafId) rafId = requestAnimationFrame(animate); }, { passive: true });
-    addEventListener('resize', () => { if (!rafId) rafId = requestAnimationFrame(animate); }, { passive: true });
-
-    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      rafId = requestAnimationFrame(animate);
-    }
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) rafId = requestAnimationFrame(animate);
   </script>
 </body>
 </html>
