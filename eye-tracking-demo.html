@@ -202,10 +202,11 @@
 
       <div class="group">
         <h2>Geometry / Motion</h2>
-        <label><span>Max iris travel <output id="outMaxTravel">0.12</output></span><input id="maxTravel" type="range" min="0.03" max="0.35" value="0.12" step="0.005" /></label>
+        <label><span>Max iris travel <output id="outMaxTravel">0.20</output></span><input id="maxTravel" type="range" min="0.05" max="0.60" value="0.20" step="0.005" /></label>
         <label><span>Damping <output id="outDamping">0.16</output></span><input id="damping" type="range" min="0.04" max="0.35" value="0.16" step="0.01" /></label>
         <label><span>Iris size <output id="outIrisScale">0.55</output></span><input id="irisScale" type="range" min="0.38" max="0.78" value="0.55" step="0.01" /></label>
         <label><span>Pupil size <output id="outPupilScale">0.43</output></span><input id="pupilScale" type="range" min="0.22" max="0.70" value="0.43" step="0.01" /></label>
+        <label><span>Pupil lead <output id="outPupilLead">1.25</output></span><input id="pupilLead" type="range" min="0.8" max="2.6" value="1.25" step="0.05" /></label>
       </div>
 
       <div class="group">
@@ -214,6 +215,11 @@
         <label><span>Center boost <output id="outCenterBoost">0.52</output></span><input id="centerBoost" type="range" min="0" max="1.4" value="0.52" step="0.02" /></label>
         <label><span>Ring boost <output id="outRingBoost">0.26</output></span><input id="ringBoost" type="range" min="0" max="1.2" value="0.26" step="0.02" /></label>
         <label><span>Warp strength <output id="outWarp">17.0</output></span><input id="warpStrength" type="range" min="2" max="40" value="17" step="0.5" /></label>
+        <label><span>Normal from texture <output id="outNormalTexture">1.00</output></span><input id="normalTexture" type="range" min="0" max="2.5" value="1.00" step="0.05" /></label>
+        <label><span>Normal radial field <output id="outNormalRadial">1.20</output></span><input id="normalRadial" type="range" min="0" max="3.0" value="1.20" step="0.05" /></label>
+        <label><span>Normal strength <output id="outNormalStrength">1.10</output></span><input id="normalStrength" type="range" min="0.2" max="3.0" value="1.10" step="0.05" /></label>
+        <label><span>Map flow amount <output id="outMapFlow">8.0</output></span><input id="mapFlow" type="range" min="0" max="22" value="8" step="0.5" /></label>
+        <label><span>Map flow speed <output id="outFlowSpeed">0.80</output></span><input id="flowSpeed" type="range" min="0" max="3" value="0.80" step="0.05" /></label>
       </div>
 
       <div class="group">
@@ -260,10 +266,16 @@
       damping: document.getElementById('damping'),
       irisScale: document.getElementById('irisScale'),
       pupilScale: document.getElementById('pupilScale'),
+      pupilLead: document.getElementById('pupilLead'),
       depthContrast: document.getElementById('depthContrast'),
       centerBoost: document.getElementById('centerBoost'),
       ringBoost: document.getElementById('ringBoost'),
       warpStrength: document.getElementById('warpStrength'),
+      normalTexture: document.getElementById('normalTexture'),
+      normalRadial: document.getElementById('normalRadial'),
+      normalStrength: document.getElementById('normalStrength'),
+      mapFlow: document.getElementById('mapFlow'),
+      flowSpeed: document.getElementById('flowSpeed'),
       lightGain: document.getElementById('lightGain'),
       depthLight: document.getElementById('depthLight'),
       fileInput: document.getElementById('fileInput'),
@@ -277,10 +289,16 @@
       damping: document.getElementById('outDamping'),
       irisScale: document.getElementById('outIrisScale'),
       pupilScale: document.getElementById('outPupilScale'),
+      pupilLead: document.getElementById('outPupilLead'),
       depthContrast: document.getElementById('outDepthContrast'),
       centerBoost: document.getElementById('outCenterBoost'),
       ringBoost: document.getElementById('outRingBoost'),
       warpStrength: document.getElementById('outWarp'),
+      normalTexture: document.getElementById('outNormalTexture'),
+      normalRadial: document.getElementById('outNormalRadial'),
+      normalStrength: document.getElementById('outNormalStrength'),
+      mapFlow: document.getElementById('outMapFlow'),
+      flowSpeed: document.getElementById('outFlowSpeed'),
       lightGain: document.getElementById('outLightGain'),
       depthLight: document.getElementById('outDepthLight'),
     };
@@ -304,6 +322,7 @@
       gazeY: 0,
       running: false,
       textureImage: null,
+      time: 0,
     };
 
     function clamp(v, min, max) {
@@ -475,6 +494,10 @@
         }
       }
 
+      const texNormalWeight = Number(controls.normalTexture.value);
+      const radialNormalWeight = Number(controls.normalRadial.value);
+      const normalStrength = Number(controls.normalStrength.value);
+
       const gradX = new Float32Array(px);
       const gradY = new Float32Array(px);
       for (let y = 1; y < state.h - 1; y++) {
@@ -491,9 +514,16 @@
           const sx = (p20 + 2 * p21 + p22) - (p00 + 2 * p01 + p02);
           const sy = (p02 + 2 * p12 + p22) - (p00 + 2 * p10 + p20);
 
+          const dx = x - state.cx;
+          const dy = y - state.cy;
+          const dist = Math.hypot(dx, dy) || 1;
+          const rx = dx / dist;
+          const ry = dy / dist;
+          const radialFalloff = 1 - smoothstep(state.holeRadius, state.outerRadius, dist);
+
           const p = y * state.w + x;
-          gradX[p] = sx;
-          gradY[p] = sy;
+          gradX[p] = (sx * texNormalWeight + rx * radialNormalWeight * radialFalloff) * normalStrength;
+          gradY[p] = (sy * texNormalWeight + ry * radialNormalWeight * radialFalloff) * normalStrength;
         }
       }
 
@@ -504,7 +534,7 @@
 
       drawDebugDepth(smooth);
 
-      const nMax = 0.45;
+      const nMax = 1.1;
       const normX = new Float32Array(px);
       const normY = new Float32Array(px);
       for (let i = 0; i < px; i++) {
@@ -514,11 +544,15 @@
       drawDebugNormal(normX, normY);
     }
 
-    function drawIris(cx, cy, gazeNorm) {
+    function drawIris(cx, cy, gazeNorm, gazeX, gazeY) {
       const irisScale = Number(controls.irisScale.value);
       const irisR = state.holeRadius * irisScale;
       const basePupilScale = Number(controls.pupilScale.value);
       const pupilR = irisR * clamp(basePupilScale - gazeNorm * 0.06, 0.16, 0.78);
+      const pupilLead = Number(controls.pupilLead.value);
+
+      const pupilX = cx + gazeX * (pupilLead - 1) * 0.6;
+      const pupilY = cy + gazeY * (pupilLead - 1) * 0.6;
 
       const grad = mainCtx.createRadialGradient(
         cx - irisR * 0.2,
@@ -528,9 +562,9 @@
         cy,
         irisR
       );
-      grad.addColorStop(0, '#1a2018');
-      grad.addColorStop(0.44, '#0f150e');
-      grad.addColorStop(1, '#040505');
+      grad.addColorStop(0, '#151a14');
+      grad.addColorStop(0.44, '#0b100a');
+      grad.addColorStop(1, '#030403');
 
       mainCtx.fillStyle = grad;
       mainCtx.beginPath();
@@ -539,9 +573,8 @@
 
       mainCtx.fillStyle = '#000';
       mainCtx.beginPath();
-      mainCtx.arc(cx, cy, pupilR, 0, Math.PI * 2);
+      mainCtx.ellipse(pupilX, pupilY, pupilR, pupilR * 0.94, 0, 0, Math.PI * 2);
       mainCtx.fill();
-
     }
 
     function render() {
@@ -563,9 +596,13 @@
 
       mainCtx.clearRect(0, 0, w, h);
 
-      const irisX = state.cx + state.gazeX * 0.95;
-      const irisY = state.cy + state.gazeY * 0.95;
-      drawIris(irisX, irisY, gazeNorm);
+      const irisX = state.cx + state.gazeX * 0.98;
+      const irisY = state.cy + state.gazeY * 0.98;
+
+      const mapFlow = Number(controls.mapFlow.value);
+      const flowSpeed = Number(controls.flowSpeed.value);
+      const flowX = Math.sin(state.time * flowSpeed * 0.001 + dirY * 2.3) * mapFlow;
+      const flowY = Math.cos(state.time * flowSpeed * 0.001 + dirX * 2.3) * mapFlow;
 
       for (let y = 0; y < h; y++) {
         for (let x = 0; x < w; x++) {
@@ -585,10 +622,22 @@
           const radial = 1 - smoothstep(state.holeRadius, state.outerRadius, d);
           const anchored = radial * radial;
           const holeGuard = smoothstep(state.holeRadius * 0.83, state.holeRadius * 0.98, d);
-          const depth = state.depth[p];
+          if (d < state.holeRadius * 0.985) {
+            out[i] = 0;
+            out[i + 1] = 0;
+            out[i + 2] = 0;
+            out[i + 3] = 0;
+            continue;
+          }
 
-          const gx = state.gradX[p];
-          const gy = state.gradY[p];
+          const fx = clamp(Math.round(x + flowX), 0, w - 1);
+          const fy = clamp(Math.round(y + flowY), 0, h - 1);
+          const fp = fy * w + fx;
+
+          const depth = state.depth[fp];
+
+          const gx = state.gradX[fp];
+          const gy = state.gradY[fp];
           const gmag = Math.hypot(gx, gy);
           const nx = gmag > 0.00001 ? gx / gmag : 0;
           const ny = gmag > 0.00001 ? gy / gmag : 0;
@@ -613,11 +662,13 @@
       }
 
       mainCtx.putImageData(state.renderData, 0, 0);
+      drawIris(irisX, irisY, gazeNorm, state.gazeX, state.gazeY);
     }
 
     function animate() {
       if (!state.running) return;
       const damping = Number(controls.damping.value);
+      state.time = performance.now();
       state.gazeX += (state.gazeTargetX - state.gazeX) * damping;
       state.gazeY += (state.gazeTargetY - state.gazeY) * damping;
       render();
@@ -643,7 +694,7 @@
         if (el.tagName === 'INPUT' && el.type === 'range') {
           el.addEventListener('input', () => {
             setOutputValues();
-            if (['depthContrast', 'centerBoost', 'ringBoost'].includes(key)) {
+            if (['depthContrast', 'centerBoost', 'ringBoost', 'normalTexture', 'normalRadial', 'normalStrength'].includes(key)) {
               rebuildMaps();
             }
           });
@@ -657,14 +708,20 @@
       });
 
       controls.btnPreset.addEventListener('click', () => {
-        controls.maxTravel.value = '0.14';
+        controls.maxTravel.value = '0.24';
         controls.damping.value = '0.15';
         controls.irisScale.value = '0.56';
-        controls.pupilScale.value = '0.42';
+        controls.pupilScale.value = '0.40';
+        controls.pupilLead.value = '1.55';
         controls.depthContrast.value = '1.35';
         controls.centerBoost.value = '0.58';
         controls.ringBoost.value = '0.30';
-        controls.warpStrength.value = '18.5';
+        controls.warpStrength.value = '22';
+        controls.normalTexture.value = '1.10';
+        controls.normalRadial.value = '1.35';
+        controls.normalStrength.value = '1.35';
+        controls.mapFlow.value = '10';
+        controls.flowSpeed.value = '1.00';
         controls.lightGain.value = '0.33';
         controls.depthLight.value = '0.24';
         setOutputValues();
