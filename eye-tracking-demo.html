@@ -1,0 +1,779 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eye 3D Studio (No Pixi)</title>
+  <style>
+    :root {
+      --bg-0: #0a0f16;
+      --bg-1: #141b28;
+      --panel: rgba(18, 24, 36, 0.86);
+      --line: rgba(255,255,255,0.12);
+      --text: #ecf3ff;
+      --muted: #9eabc8;
+      --accent: #84c3ff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background:
+        radial-gradient(circle at 18% 12%, #1f2b42 0%, var(--bg-1) 40%, var(--bg-0) 100%);
+    }
+
+    .layout {
+      max-width: 1260px;
+      margin: 0 auto;
+      padding: 1rem;
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: minmax(290px, 360px) minmax(0, 1fr);
+      align-items: start;
+    }
+
+    .panel {
+      position: sticky;
+      top: 0.6rem;
+      border-radius: 16px;
+      padding: 0.9rem;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      backdrop-filter: blur(8px);
+      max-height: calc(100dvh - 1.2rem);
+      overflow: auto;
+    }
+
+    h1 {
+      margin: 0 0 0.35rem;
+      font-size: 1.05rem;
+      letter-spacing: 0.01em;
+    }
+
+    .intro {
+      margin: 0 0 .7rem;
+      color: var(--muted);
+      font-size: .86rem;
+      line-height: 1.45;
+    }
+
+    .group {
+      border-top: 1px solid rgba(255,255,255,0.11);
+      padding-top: .7rem;
+      margin-top: .7rem;
+    }
+
+    .group h2 {
+      margin: 0 0 .48rem;
+      font-size: .82rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      opacity: .9;
+    }
+
+    label {
+      display: grid;
+      gap: .15rem;
+      margin-bottom: .42rem;
+      font-size: .79rem;
+      color: #d5def3;
+    }
+
+    label span {
+      display: flex;
+      justify-content: space-between;
+      color: #b9c5e2;
+      font-size: .75rem;
+    }
+
+    input[type="range"] { width: 100%; }
+
+    input[type="file"] {
+      width: 100%;
+      font-size: .78rem;
+      color: #c8d5f2;
+    }
+
+    .button-row {
+      display: flex;
+      gap: .45rem;
+      flex-wrap: wrap;
+      margin-top: .35rem;
+    }
+
+    button {
+      border: 1px solid rgba(255,255,255,.18);
+      background: #1b2840;
+      color: #e8f1ff;
+      border-radius: 8px;
+      padding: .45rem .58rem;
+      font-size: .76rem;
+      cursor: pointer;
+    }
+
+    button:hover { background: #223553; }
+
+    .stage {
+      display: grid;
+      gap: .85rem;
+    }
+
+    .hero {
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: radial-gradient(circle at 50% 10%, rgba(255,255,255,.05), rgba(255,255,255,0));
+      overflow: hidden;
+    }
+
+    #mainCanvas {
+      width: 100%;
+      aspect-ratio: 1;
+      display: block;
+      touch-action: none;
+      cursor: crosshair;
+    }
+
+    .grid {
+      display: grid;
+      gap: .8rem;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .tile {
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      overflow: hidden;
+      background: rgba(255,255,255,0.02);
+    }
+
+    .tile h3 {
+      margin: 0;
+      font-size: .74rem;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      color: #d2ddf5;
+      padding: .4rem .6rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .tile canvas {
+      width: 100%;
+      aspect-ratio: 1;
+      display: block;
+      image-rendering: pixelated;
+    }
+
+    .note {
+      margin: 0;
+      color: var(--muted);
+      font-size: .8rem;
+    }
+
+    @media (max-width: 980px) {
+      .layout { grid-template-columns: 1fr; }
+      .panel {
+        position: static;
+        max-height: none;
+      }
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="panel">
+      <h1>Eye 3D Studio (Canvas, no Pixi.js)</h1>
+      <p class="intro">
+        Load your eye PNG, generate pseudo depth + normal maps, and tune real-time displacement so the outer shell stays stable while center flow feels 3D.
+      </p>
+
+      <div class="group">
+        <h2>Asset</h2>
+        <label>
+          <span>Upload chameleon eye image</span>
+          <input id="fileInput" type="file" accept="image/png,image/webp,image/jpeg" />
+        </label>
+        <p class="note">Tip: upload your real chameleon eye PNG to replace the texture; transparent center hole works best.</p>
+      </div>
+
+      <div class="group">
+        <h2>Geometry / Motion</h2>
+        <label><span>Max iris travel <output id="outMaxTravel">0.20</output></span><input id="maxTravel" type="range" min="0.05" max="0.60" value="0.20" step="0.005" /></label>
+        <label><span>Damping <output id="outDamping">0.16</output></span><input id="damping" type="range" min="0.04" max="0.35" value="0.16" step="0.01" /></label>
+        <label><span>Iris size <output id="outIrisScale">0.55</output></span><input id="irisScale" type="range" min="0.38" max="0.78" value="0.55" step="0.01" /></label>
+        <label><span>Pupil size <output id="outPupilScale">0.43</output></span><input id="pupilScale" type="range" min="0.22" max="0.70" value="0.43" step="0.01" /></label>
+        <label><span>Pupil lead <output id="outPupilLead">1.25</output></span><input id="pupilLead" type="range" min="0.8" max="2.6" value="1.25" step="0.05" /></label>
+      </div>
+
+      <div class="group">
+        <h2>Depth / Warp</h2>
+        <label><span>Depth contrast <output id="outDepthContrast">1.25</output></span><input id="depthContrast" type="range" min="0.6" max="2.4" value="1.25" step="0.05" /></label>
+        <label><span>Center boost <output id="outCenterBoost">0.52</output></span><input id="centerBoost" type="range" min="0" max="1.4" value="0.52" step="0.02" /></label>
+        <label><span>Ring boost <output id="outRingBoost">0.26</output></span><input id="ringBoost" type="range" min="0" max="1.2" value="0.26" step="0.02" /></label>
+        <label><span>Warp strength <output id="outWarp">17.0</output></span><input id="warpStrength" type="range" min="2" max="40" value="17" step="0.5" /></label>
+        <label><span>Normal from texture <output id="outNormalTexture">1.00</output></span><input id="normalTexture" type="range" min="0" max="2.5" value="1.00" step="0.05" /></label>
+        <label><span>Normal radial field <output id="outNormalRadial">1.20</output></span><input id="normalRadial" type="range" min="0" max="3.0" value="1.20" step="0.05" /></label>
+        <label><span>Normal strength <output id="outNormalStrength">1.10</output></span><input id="normalStrength" type="range" min="0.2" max="3.0" value="1.10" step="0.05" /></label>
+        <label><span>Map flow amount <output id="outMapFlow">8.0</output></span><input id="mapFlow" type="range" min="0" max="22" value="8" step="0.5" /></label>
+        <label><span>Map flow speed <output id="outFlowSpeed">0.80</output></span><input id="flowSpeed" type="range" min="0" max="3" value="0.80" step="0.05" /></label>
+      </div>
+
+      <div class="group">
+        <h2>Lighting</h2>
+        <label><span>Light gain <output id="outLightGain">0.30</output></span><input id="lightGain" type="range" min="0" max="0.8" value="0.30" step="0.01" /></label>
+        <label><span>Depth light gain <output id="outDepthLight">0.22</output></span><input id="depthLight" type="range" min="0" max="0.7" value="0.22" step="0.01" /></label>
+      </div>
+
+      <div class="group">
+        <h2>Actions</h2>
+        <div class="button-row">
+          <button id="btnRebuild" type="button">Rebuild maps</button>
+          <button id="btnCenter" type="button">Reset gaze</button>
+          <button id="btnPreset" type="button">Realistic preset</button>
+        </div>
+      </div>
+    </aside>
+
+    <section class="stage">
+      <div class="hero"><canvas id="mainCanvas" width="820" height="820" aria-label="Interactive eye render"></canvas></div>
+      <div class="grid">
+        <article class="tile"><h3>Source</h3><canvas id="sourceCanvas" width="280" height="280"></canvas></article>
+        <article class="tile"><h3>Depth map</h3><canvas id="depthCanvas" width="280" height="280"></canvas></article>
+        <article class="tile"><h3>Normal map</h3><canvas id="normalCanvas" width="280" height="280"></canvas></article>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const FALLBACK_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600'%3E%3Cdefs%3E%3CradialGradient id='rg' cx='45%25' cy='30%25' r='72%25'%3E%3Cstop offset='0%25' stop-color='%23d5d5d5'/%3E%3Cstop offset='62%25' stop-color='%23919191'/%3E%3Cstop offset='100%25' stop-color='%23585858'/%3E%3C/radialGradient%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.03' numOctaves='2' seed='8'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3C/defs%3E%3Ccircle cx='300' cy='300' r='276' fill='url(%23rg)'/%3E%3Ccircle cx='300' cy='300' r='276' filter='url(%23noise)' opacity='0.22'/%3E%3Ccircle cx='300' cy='300' r='86' fill='%23fff'/%3E%3C/svg%3E";
+
+    const mainCanvas = document.getElementById('mainCanvas');
+    const mainCtx = mainCanvas.getContext('2d', { alpha: true, willReadFrequently: true });
+
+    const sourceCanvas = document.getElementById('sourceCanvas');
+    const sourceCtx = sourceCanvas.getContext('2d', { willReadFrequently: true });
+    const depthCanvas = document.getElementById('depthCanvas');
+    const depthCtx = depthCanvas.getContext('2d', { willReadFrequently: true });
+    const normalCanvas = document.getElementById('normalCanvas');
+    const normalCtx = normalCanvas.getContext('2d', { willReadFrequently: true });
+
+    const controls = {
+      maxTravel: document.getElementById('maxTravel'),
+      damping: document.getElementById('damping'),
+      irisScale: document.getElementById('irisScale'),
+      pupilScale: document.getElementById('pupilScale'),
+      pupilLead: document.getElementById('pupilLead'),
+      depthContrast: document.getElementById('depthContrast'),
+      centerBoost: document.getElementById('centerBoost'),
+      ringBoost: document.getElementById('ringBoost'),
+      warpStrength: document.getElementById('warpStrength'),
+      normalTexture: document.getElementById('normalTexture'),
+      normalRadial: document.getElementById('normalRadial'),
+      normalStrength: document.getElementById('normalStrength'),
+      mapFlow: document.getElementById('mapFlow'),
+      flowSpeed: document.getElementById('flowSpeed'),
+      lightGain: document.getElementById('lightGain'),
+      depthLight: document.getElementById('depthLight'),
+      fileInput: document.getElementById('fileInput'),
+      btnRebuild: document.getElementById('btnRebuild'),
+      btnCenter: document.getElementById('btnCenter'),
+      btnPreset: document.getElementById('btnPreset'),
+    };
+
+    const outputs = {
+      maxTravel: document.getElementById('outMaxTravel'),
+      damping: document.getElementById('outDamping'),
+      irisScale: document.getElementById('outIrisScale'),
+      pupilScale: document.getElementById('outPupilScale'),
+      pupilLead: document.getElementById('outPupilLead'),
+      depthContrast: document.getElementById('outDepthContrast'),
+      centerBoost: document.getElementById('outCenterBoost'),
+      ringBoost: document.getElementById('outRingBoost'),
+      warpStrength: document.getElementById('outWarp'),
+      normalTexture: document.getElementById('outNormalTexture'),
+      normalRadial: document.getElementById('outNormalRadial'),
+      normalStrength: document.getElementById('outNormalStrength'),
+      mapFlow: document.getElementById('outMapFlow'),
+      flowSpeed: document.getElementById('outFlowSpeed'),
+      lightGain: document.getElementById('outLightGain'),
+      depthLight: document.getElementById('outDepthLight'),
+    };
+
+    const state = {
+      w: mainCanvas.width,
+      h: mainCanvas.height,
+      cx: mainCanvas.width / 2,
+      cy: mainCanvas.height / 2,
+      holeRadius: mainCanvas.width * 0.125,
+      outerRadius: mainCanvas.width * 0.46,
+      srcData: null,
+      renderData: mainCtx.createImageData(mainCanvas.width, mainCanvas.height),
+      depth: null,
+      gradX: null,
+      gradY: null,
+      alphaMask: null,
+      gazeTargetX: 0,
+      gazeTargetY: 0,
+      gazeX: 0,
+      gazeY: 0,
+      running: false,
+      textureImage: null,
+      time: 0,
+    };
+
+    function clamp(v, min, max) {
+      return Math.min(max, Math.max(min, v));
+    }
+
+    function smoothstep(e0, e1, x) {
+      const t = clamp((x - e0) / (e1 - e0), 0, 1);
+      return t * t * (3 - 2 * t);
+    }
+
+    function setOutputValues() {
+      Object.keys(outputs).forEach((key) => {
+        outputs[key].textContent = Number(controls[key].value).toFixed(key === 'warpStrength' ? 1 : 2);
+      });
+    }
+
+    function makeImage(src) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.crossOrigin = 'anonymous';
+        image.onload = () => resolve(image);
+        image.onerror = reject;
+        image.src = src;
+      });
+    }
+
+    function drawDebugSource(imgData) {
+      const debug = document.createElement('canvas');
+      debug.width = state.w;
+      debug.height = state.h;
+      debug.getContext('2d').putImageData(imgData, 0, 0);
+      sourceCtx.clearRect(0, 0, sourceCanvas.width, sourceCanvas.height);
+      sourceCtx.drawImage(debug, 0, 0, sourceCanvas.width, sourceCanvas.height);
+    }
+
+    function drawDebugDepth(depth) {
+      const img = depthCtx.createImageData(state.w, state.h);
+      for (let i = 0; i < depth.length; i++) {
+        const v = Math.round(clamp(depth[i], 0, 1) * 255);
+        const k = i * 4;
+        img.data[k] = v;
+        img.data[k + 1] = v;
+        img.data[k + 2] = v;
+        img.data[k + 3] = 255;
+      }
+      const temp = document.createElement('canvas');
+      temp.width = state.w;
+      temp.height = state.h;
+      temp.getContext('2d').putImageData(img, 0, 0);
+      depthCtx.clearRect(0, 0, depthCanvas.width, depthCanvas.height);
+      depthCtx.drawImage(temp, 0, 0, depthCanvas.width, depthCanvas.height);
+    }
+
+    function drawDebugNormal(gradX, gradY) {
+      const img = normalCtx.createImageData(state.w, state.h);
+      for (let i = 0; i < gradX.length; i++) {
+        const nx = clamp(gradX[i] * 0.5 + 0.5, 0, 1);
+        const ny = clamp(gradY[i] * 0.5 + 0.5, 0, 1);
+        const k = i * 4;
+        img.data[k] = Math.round(nx * 255);
+        img.data[k + 1] = Math.round(ny * 255);
+        img.data[k + 2] = 190;
+        img.data[k + 3] = 255;
+      }
+      const temp = document.createElement('canvas');
+      temp.width = state.w;
+      temp.height = state.h;
+      temp.getContext('2d').putImageData(img, 0, 0);
+      normalCtx.clearRect(0, 0, normalCanvas.width, normalCanvas.height);
+      normalCtx.drawImage(temp, 0, 0, normalCanvas.width, normalCanvas.height);
+    }
+
+    function detectGeometry(data) {
+      let count = 0;
+      let sumX = 0;
+      let sumY = 0;
+      for (let y = 0; y < state.h; y++) {
+        for (let x = 0; x < state.w; x++) {
+          const i = (y * state.w + x) * 4;
+          if (data[i + 3] > 10) {
+            count++;
+            sumX += x;
+            sumY += y;
+          }
+        }
+      }
+
+      if (count > 0) {
+        state.cx = sumX / count;
+        state.cy = sumY / count;
+      }
+
+      let outer = 0;
+      for (let y = 0; y < state.h; y++) {
+        for (let x = 0; x < state.w; x++) {
+          const i = (y * state.w + x) * 4;
+          if (data[i + 3] > 10) {
+            outer = Math.max(outer, Math.hypot(x - state.cx, y - state.cy));
+          }
+        }
+      }
+      state.outerRadius = outer || state.outerRadius;
+
+      let inner = state.w;
+      for (let a = 0; a < 360; a += 3) {
+        const rad = (a * Math.PI) / 180;
+        for (let r = 1; r < state.outerRadius; r++) {
+          const x = Math.round(state.cx + Math.cos(rad) * r);
+          const y = Math.round(state.cy + Math.sin(rad) * r);
+          if (x < 0 || x >= state.w || y < 0 || y >= state.h) break;
+          const i = (y * state.w + x) * 4;
+          if (data[i + 3] > 24) {
+            inner = Math.min(inner, r);
+            break;
+          }
+        }
+      }
+      if (inner < state.w) state.holeRadius = inner;
+    }
+
+    function rebuildMaps() {
+      if (!state.srcData) return;
+
+      const depthContrast = Number(controls.depthContrast.value);
+      const centerBoost = Number(controls.centerBoost.value);
+      const ringBoost = Number(controls.ringBoost.value);
+
+      const src = state.srcData.data;
+      const px = state.w * state.h;
+      const depth = new Float32Array(px);
+      const alphaMask = new Float32Array(px);
+
+      for (let y = 0; y < state.h; y++) {
+        for (let x = 0; x < state.w; x++) {
+          const p = y * state.w + x;
+          const i = p * 4;
+          const a = src[i + 3] / 255;
+          alphaMask[p] = a;
+          if (a < 0.02) {
+            depth[p] = 0;
+            continue;
+          }
+
+          const lum = (0.2126 * src[i] + 0.7152 * src[i + 1] + 0.0722 * src[i + 2]) / 255;
+          const base = Math.pow(1 - lum, depthContrast);
+
+          const d = Math.hypot(x - state.cx, y - state.cy);
+          const center = 1 - smoothstep(state.holeRadius, state.outerRadius, d);
+          const ring = smoothstep(state.holeRadius * 0.93, state.holeRadius * 1.9, d) * center;
+
+          depth[p] = clamp((base + center * centerBoost + ring * ringBoost) * a, 0, 1);
+        }
+      }
+
+      const smooth = depth.slice();
+      const r = 2;
+      for (let y = r; y < state.h - r; y++) {
+        for (let x = r; x < state.w - r; x++) {
+          let sum = 0;
+          let count = 0;
+          for (let oy = -r; oy <= r; oy++) {
+            for (let ox = -r; ox <= r; ox++) {
+              sum += depth[(y + oy) * state.w + (x + ox)];
+              count++;
+            }
+          }
+          smooth[y * state.w + x] = sum / count;
+        }
+      }
+
+      const texNormalWeight = Number(controls.normalTexture.value);
+      const radialNormalWeight = Number(controls.normalRadial.value);
+      const normalStrength = Number(controls.normalStrength.value);
+
+      const gradX = new Float32Array(px);
+      const gradY = new Float32Array(px);
+      for (let y = 1; y < state.h - 1; y++) {
+        for (let x = 1; x < state.w - 1; x++) {
+          const p00 = smooth[(y - 1) * state.w + (x - 1)];
+          const p10 = smooth[(y - 1) * state.w + x];
+          const p20 = smooth[(y - 1) * state.w + (x + 1)];
+          const p01 = smooth[y * state.w + (x - 1)];
+          const p21 = smooth[y * state.w + (x + 1)];
+          const p02 = smooth[(y + 1) * state.w + (x - 1)];
+          const p12 = smooth[(y + 1) * state.w + x];
+          const p22 = smooth[(y + 1) * state.w + (x + 1)];
+
+          const sx = (p20 + 2 * p21 + p22) - (p00 + 2 * p01 + p02);
+          const sy = (p02 + 2 * p12 + p22) - (p00 + 2 * p10 + p20);
+
+          const dx = x - state.cx;
+          const dy = y - state.cy;
+          const dist = Math.hypot(dx, dy) || 1;
+          const rx = dx / dist;
+          const ry = dy / dist;
+          const radialFalloff = 1 - smoothstep(state.holeRadius, state.outerRadius, dist);
+
+          const p = y * state.w + x;
+          gradX[p] = (sx * texNormalWeight + rx * radialNormalWeight * radialFalloff) * normalStrength;
+          gradY[p] = (sy * texNormalWeight + ry * radialNormalWeight * radialFalloff) * normalStrength;
+        }
+      }
+
+      state.depth = smooth;
+      state.gradX = gradX;
+      state.gradY = gradY;
+      state.alphaMask = alphaMask;
+
+      drawDebugDepth(smooth);
+
+      const nMax = 1.1;
+      const normX = new Float32Array(px);
+      const normY = new Float32Array(px);
+      for (let i = 0; i < px; i++) {
+        normX[i] = clamp((gradX[i] / nMax + 1) * 0.5, 0, 1);
+        normY[i] = clamp((gradY[i] / nMax + 1) * 0.5, 0, 1);
+      }
+      drawDebugNormal(normX, normY);
+    }
+
+    function drawIris(cx, cy, gazeNorm, gazeX, gazeY) {
+      const irisScale = Number(controls.irisScale.value);
+      const irisR = state.holeRadius * irisScale;
+      const basePupilScale = Number(controls.pupilScale.value);
+      const pupilR = irisR * clamp(basePupilScale - gazeNorm * 0.06, 0.16, 0.78);
+      const pupilLead = Number(controls.pupilLead.value);
+
+      const pupilX = cx + gazeX * (pupilLead - 1) * 0.6;
+      const pupilY = cy + gazeY * (pupilLead - 1) * 0.6;
+
+      const grad = mainCtx.createRadialGradient(
+        cx - irisR * 0.2,
+        cy - irisR * 0.18,
+        irisR * 0.15,
+        cx,
+        cy,
+        irisR
+      );
+      grad.addColorStop(0, '#151a14');
+      grad.addColorStop(0.44, '#0b100a');
+      grad.addColorStop(1, '#030403');
+
+      mainCtx.fillStyle = grad;
+      mainCtx.beginPath();
+      mainCtx.arc(cx, cy, irisR, 0, Math.PI * 2);
+      mainCtx.fill();
+
+      mainCtx.fillStyle = '#000';
+      mainCtx.beginPath();
+      mainCtx.ellipse(pupilX, pupilY, pupilR, pupilR * 0.94, 0, 0, Math.PI * 2);
+      mainCtx.fill();
+    }
+
+    function render() {
+      if (!state.srcData || !state.depth || !state.gradX || !state.gradY) return;
+
+      const src = state.srcData.data;
+      const out = state.renderData.data;
+      const w = state.w;
+      const h = state.h;
+      const warpStrength = Number(controls.warpStrength.value);
+      const lightGain = Number(controls.lightGain.value);
+      const depthLight = Number(controls.depthLight.value);
+      const maxTravelPx = w * Number(controls.maxTravel.value);
+
+      const gazeDist = Math.hypot(state.gazeX, state.gazeY);
+      const gazeNorm = clamp(gazeDist / maxTravelPx, 0, 1);
+      const dirX = gazeDist > 0.001 ? state.gazeX / gazeDist : 0;
+      const dirY = gazeDist > 0.001 ? state.gazeY / gazeDist : 0;
+
+      mainCtx.clearRect(0, 0, w, h);
+
+      const irisX = state.cx + state.gazeX * 0.98;
+      const irisY = state.cy + state.gazeY * 0.98;
+
+      const mapFlow = Number(controls.mapFlow.value);
+      const flowSpeed = Number(controls.flowSpeed.value);
+      const flowX = Math.sin(state.time * flowSpeed * 0.001 + dirY * 2.3) * mapFlow;
+      const flowY = Math.cos(state.time * flowSpeed * 0.001 + dirX * 2.3) * mapFlow;
+
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          const p = y * w + x;
+          const i = p * 4;
+          const a = state.alphaMask[p];
+
+          if (a < 0.01) {
+            out[i] = 0;
+            out[i + 1] = 0;
+            out[i + 2] = 0;
+            out[i + 3] = 0;
+            continue;
+          }
+
+          const d = Math.hypot(x - state.cx, y - state.cy);
+          const radial = 1 - smoothstep(state.holeRadius, state.outerRadius, d);
+          const anchored = radial * radial;
+          const holeGuard = smoothstep(state.holeRadius * 0.83, state.holeRadius * 0.98, d);
+          if (d < state.holeRadius * 0.985) {
+            out[i] = 0;
+            out[i + 1] = 0;
+            out[i + 2] = 0;
+            out[i + 3] = 0;
+            continue;
+          }
+
+          const fx = clamp(Math.round(x + flowX), 0, w - 1);
+          const fy = clamp(Math.round(y + flowY), 0, h - 1);
+          const fp = fy * w + fx;
+
+          const depth = state.depth[fp];
+
+          const gx = state.gradX[fp];
+          const gy = state.gradY[fp];
+          const gmag = Math.hypot(gx, gy);
+          const nx = gmag > 0.00001 ? gx / gmag : 0;
+          const ny = gmag > 0.00001 ? gy / gmag : 0;
+
+          const directional = nx * dirX + ny * dirY;
+          const amount = warpStrength * anchored * holeGuard * (0.35 + depth * 0.95);
+
+          const dx = dirX * amount + nx * amount * 0.5 * directional;
+          const dy = dirY * amount + ny * amount * 0.5 * directional;
+
+          const sx = clamp(Math.round(x - dx), 0, w - 1);
+          const sy = clamp(Math.round(y - dy), 0, h - 1);
+          const si = (sy * w + sx) * 4;
+
+          const light = clamp(0.9 + directional * anchored * lightGain + depth * anchored * depthLight, 0.55, 1.45);
+
+          out[i] = clamp(src[si] * light, 0, 255);
+          out[i + 1] = clamp(src[si + 1] * light, 0, 255);
+          out[i + 2] = clamp(src[si + 2] * light, 0, 255);
+          out[i + 3] = src[si + 3];
+        }
+      }
+
+      mainCtx.putImageData(state.renderData, 0, 0);
+      drawIris(irisX, irisY, gazeNorm, state.gazeX, state.gazeY);
+    }
+
+    function animate() {
+      if (!state.running) return;
+      const damping = Number(controls.damping.value);
+      state.time = performance.now();
+      state.gazeX += (state.gazeTargetX - state.gazeX) * damping;
+      state.gazeY += (state.gazeTargetY - state.gazeY) * damping;
+      render();
+      requestAnimationFrame(animate);
+    }
+
+    function setGazeFromClient(clientX, clientY) {
+      const rect = mainCanvas.getBoundingClientRect();
+      const x = ((clientX - rect.left) / rect.width) * state.w;
+      const y = ((clientY - rect.top) / rect.height) * state.h;
+      const dx = x - state.cx;
+      const dy = y - state.cy;
+      const maxTravelPx = state.w * Number(controls.maxTravel.value);
+      const dist = Math.hypot(dx, dy) || 1;
+      const scale = Math.min(1, maxTravelPx / dist);
+      state.gazeTargetX = dx * scale;
+      state.gazeTargetY = dy * scale;
+    }
+
+    function wireEvents() {
+      Object.keys(controls).forEach((key) => {
+        const el = controls[key];
+        if (el.tagName === 'INPUT' && el.type === 'range') {
+          el.addEventListener('input', () => {
+            setOutputValues();
+            if (['depthContrast', 'centerBoost', 'ringBoost', 'normalTexture', 'normalRadial', 'normalStrength'].includes(key)) {
+              rebuildMaps();
+            }
+          });
+        }
+      });
+
+      controls.btnRebuild.addEventListener('click', rebuildMaps);
+      controls.btnCenter.addEventListener('click', () => {
+        state.gazeTargetX = 0;
+        state.gazeTargetY = 0;
+      });
+
+      controls.btnPreset.addEventListener('click', () => {
+        controls.maxTravel.value = '0.24';
+        controls.damping.value = '0.15';
+        controls.irisScale.value = '0.56';
+        controls.pupilScale.value = '0.40';
+        controls.pupilLead.value = '1.55';
+        controls.depthContrast.value = '1.35';
+        controls.centerBoost.value = '0.58';
+        controls.ringBoost.value = '0.30';
+        controls.warpStrength.value = '22';
+        controls.normalTexture.value = '1.10';
+        controls.normalRadial.value = '1.35';
+        controls.normalStrength.value = '1.35';
+        controls.mapFlow.value = '10';
+        controls.flowSpeed.value = '1.00';
+        controls.lightGain.value = '0.33';
+        controls.depthLight.value = '0.24';
+        setOutputValues();
+        rebuildMaps();
+      });
+
+      window.addEventListener('pointermove', (e) => setGazeFromClient(e.clientX, e.clientY));
+      mainCanvas.addEventListener('pointerleave', () => {
+        state.gazeTargetX = 0;
+        state.gazeTargetY = 0;
+      });
+
+      controls.fileInput.addEventListener('change', async () => {
+        const file = controls.fileInput.files && controls.fileInput.files[0];
+        if (!file) return;
+        const url = URL.createObjectURL(file);
+        try {
+          const img = await makeImage(url);
+          await loadTexture(img);
+        } finally {
+          URL.revokeObjectURL(url);
+        }
+      });
+    }
+
+    async function loadTexture(image) {
+      const work = document.createElement('canvas');
+      work.width = state.w;
+      work.height = state.h;
+      const wctx = work.getContext('2d', { willReadFrequently: true });
+
+      wctx.clearRect(0, 0, state.w, state.h);
+      wctx.drawImage(image, 0, 0, state.w, state.h);
+
+      const imgData = wctx.getImageData(0, 0, state.w, state.h);
+      state.textureImage = image;
+      state.srcData = imgData;
+      detectGeometry(imgData.data);
+      drawDebugSource(imgData);
+      rebuildMaps();
+    }
+
+    async function init() {
+      setOutputValues();
+      wireEvents();
+      const fallback = await makeImage(FALLBACK_IMAGE);
+      await loadTexture(fallback);
+      state.running = true;
+      animate();
+    }
+
+    init().catch((error) => console.error('Studio init failed', error));
+  </script>
+</body>
+</html>
