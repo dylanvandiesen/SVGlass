@@ -194,17 +194,18 @@
       <div class="group">
         <h2>Asset</h2>
         <label>
-          <span>Upload eye PNG</span>
+          <span>Upload chameleon eye image</span>
           <input id="fileInput" type="file" accept="image/png,image/webp,image/jpeg" />
         </label>
-        <p class="note">Tip: transparent PNG with a clean center hole works best.</p>
+        <p class="note">Tip: upload your real chameleon eye PNG to replace the texture; transparent center hole works best.</p>
       </div>
 
       <div class="group">
         <h2>Geometry / Motion</h2>
-        <label><span>Max iris travel <output id="outMaxTravel">0.08</output></span><input id="maxTravel" type="range" min="0.02" max="0.2" value="0.08" step="0.005" /></label>
+        <label><span>Max iris travel <output id="outMaxTravel">0.12</output></span><input id="maxTravel" type="range" min="0.03" max="0.35" value="0.12" step="0.005" /></label>
         <label><span>Damping <output id="outDamping">0.16</output></span><input id="damping" type="range" min="0.04" max="0.35" value="0.16" step="0.01" /></label>
         <label><span>Iris size <output id="outIrisScale">0.55</output></span><input id="irisScale" type="range" min="0.38" max="0.78" value="0.55" step="0.01" /></label>
+        <label><span>Pupil size <output id="outPupilScale">0.43</output></span><input id="pupilScale" type="range" min="0.22" max="0.70" value="0.43" step="0.01" /></label>
       </div>
 
       <div class="group">
@@ -258,6 +259,7 @@
       maxTravel: document.getElementById('maxTravel'),
       damping: document.getElementById('damping'),
       irisScale: document.getElementById('irisScale'),
+      pupilScale: document.getElementById('pupilScale'),
       depthContrast: document.getElementById('depthContrast'),
       centerBoost: document.getElementById('centerBoost'),
       ringBoost: document.getElementById('ringBoost'),
@@ -274,6 +276,7 @@
       maxTravel: document.getElementById('outMaxTravel'),
       damping: document.getElementById('outDamping'),
       irisScale: document.getElementById('outIrisScale'),
+      pupilScale: document.getElementById('outPupilScale'),
       depthContrast: document.getElementById('outDepthContrast'),
       centerBoost: document.getElementById('outCenterBoost'),
       ringBoost: document.getElementById('outRingBoost'),
@@ -514,7 +517,8 @@
     function drawIris(cx, cy, gazeNorm) {
       const irisScale = Number(controls.irisScale.value);
       const irisR = state.holeRadius * irisScale;
-      const pupilR = irisR * (0.43 - gazeNorm * 0.08);
+      const basePupilScale = Number(controls.pupilScale.value);
+      const pupilR = irisR * clamp(basePupilScale - gazeNorm * 0.06, 0.16, 0.78);
 
       const grad = mainCtx.createRadialGradient(
         cx - irisR * 0.2,
@@ -538,10 +542,6 @@
       mainCtx.arc(cx, cy, pupilR, 0, Math.PI * 2);
       mainCtx.fill();
 
-      mainCtx.fillStyle = 'rgba(255,255,255,0.30)';
-      mainCtx.beginPath();
-      mainCtx.arc(cx - irisR * 0.28, cy - irisR * 0.3, irisR * 0.14, 0, Math.PI * 2);
-      mainCtx.fill();
     }
 
     function render() {
@@ -657,9 +657,10 @@
       });
 
       controls.btnPreset.addEventListener('click', () => {
-        controls.maxTravel.value = '0.085';
+        controls.maxTravel.value = '0.14';
         controls.damping.value = '0.15';
         controls.irisScale.value = '0.56';
+        controls.pupilScale.value = '0.42';
         controls.depthContrast.value = '1.35';
         controls.centerBoost.value = '0.58';
         controls.ringBoost.value = '0.30';
